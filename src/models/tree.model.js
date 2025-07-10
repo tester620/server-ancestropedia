@@ -10,8 +10,7 @@ const FamilyTreeSchema = new mongoose.Schema({
   },
   profilePicture: {
     type: String,
-    default:
-      "https://res.cloudinary.com/dq1x4j3zv/image/upload/v1735686260/ancestropedia/default-profile-picture.png",
+    default:process.env.DEFAULT_IMAGE,
   },
   birthDate: {
     type: Date,

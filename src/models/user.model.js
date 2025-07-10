@@ -15,10 +15,12 @@ const userSchema = new mongoose.Schema(
       type: String,
     },
     marriageTimeline: {
-      type: {
-        start: Date,
-        end: Date,
-      },
+      start: Date,
+      end: Date,
+    },
+    verificationToken:{
+        type:String,
+        default:null
     },
     fatherName: {
       type: String,
@@ -54,8 +56,7 @@ const userSchema = new mongoose.Schema(
     },
     profilePicture: {
       type: String,
-      default:
-        process.env.NEXT_PUBLIC_DEFAULT_IMAGE,
+      default: process.env.DEFAULT_IMAGE_URL,
     },
     email: {
       type: String,
@@ -76,13 +77,7 @@ const userSchema = new mongoose.Schema(
 
 userSchema.pre("save", function (next) {
   if (!this.profilePicture) {
-    if (this.gender === "male") {
-      this.profilePicture =
-        process.env.NEXT_PUBLIC_DEFAULT_IMAGE;
-    } else if (this.gender === "female") {
-      this.profilePicture =
-        process.env.NEXT_PUBLIC_DEFAULT_IMAGE;
-    }
+    this.profilePicture = process.env.DEFAULT_IMAGE_URL;
   }
 
   if (this.marriedStatus === "married") {
