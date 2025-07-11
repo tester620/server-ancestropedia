@@ -2,25 +2,27 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
-    name: {
+    firstName: {
       type: String,
       required: true,
-      index: true,
+    },
+    upadtesLeft: {
+      type: Number,
+      max: 1,
+      default: 1,
+    },
+    lastName: {
+      type: String,
+      required: true,
     },
     marriedStatus: {
       type: String,
-      enum: ["married", "divorced", "unmarried"],
+      enum: ["married", "single"],
     },
-    spouseName: {
+
+    verificationToken: {
       type: String,
-    },
-    marriageTimeline: {
-      start: Date,
-      end: Date,
-    },
-    verificationToken:{
-        type:String,
-        default:null
+      default: null,
     },
     fatherName: {
       type: String,
@@ -69,6 +71,12 @@ const userSchema = new mongoose.Schema(
     dob: {
       type: Date,
     },
+    birthPlace: {
+      type: String,
+    },
+    alive: {
+      type: Boolean,
+    },
   },
   {
     timestamps: true,
@@ -90,7 +98,10 @@ userSchema.pre("save", function (next) {
 
   if (this.marriedStatus === "divorced") {
     if (!this.marriageTimeline?.start || !this.marriageTimeline?.end) {
-      this.invalidate("marriageTimeline", "Marriage timeline is required if divorced.");
+      this.invalidate(
+        "marriageTimeline",
+        "Marriage timeline is required if divorced."
+      );
     }
   } else {
     this.marriageTimeline = undefined;
