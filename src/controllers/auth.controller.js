@@ -1,12 +1,19 @@
 import User from "../models/user.model.js";
 import validator from "validator";
 import bcrypt from "bcryptjs";
-import jwt  from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 
 export const signup = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { firstName, lastName, email, password } = req.body;
   try {
-    if (!name || !name.trim() || !email || !password) {
+    if (
+      !firstName ||
+      !lastName ||
+      !firstName.trim() ||
+      !lastName.trim() ||
+      !email ||
+      !password
+    ) {
       return res.status(400).json({
         message: "Please fill all the feilds",
       });
@@ -38,7 +45,8 @@ export const signup = async (req, res) => {
     const user = new User({
       email,
       password: hashedPassword,
-      name,
+      firstName,
+      lastName,
     });
     await user.save();
     return res.status(201).json({
@@ -58,11 +66,9 @@ export const googleAuth = (req, res, next) => {
     if (err || !user) {
       return res.redirect("/login");
     }
-    const token = jwt.sign(
-      { userId: user._id }, 
-      process.env.JWT_SECRET, 
-      { expiresIn: "7d" }
-    );
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
 
     res.cookie("token", token, {
       httpOnly: true,
@@ -106,18 +112,18 @@ export const login = async (req, res) => {
   }
 };
 
-export const logout = (req,res)=>{
-    req.session.user = null;
-    return res.status(200).json({
-        message:"Logged out successfully"
-    })
-}
+export const logout = (req, res) => {
+  req.session.user = null;
+  return res.status(200).json({
+    message: "Logged out successfully",
+  });
+};
 
 export const updatePass = async (req, res) => {
   const { oldPass, newPass } = req.body;
   const user = req?.session?.user;
   try {
-    if (!oldPass || !newPass) { 
+    if (!oldPass || !newPass) {
       return res
         .status(400)
         .json({ message: "Please fill all the required feilds" });
@@ -140,5 +146,3 @@ export const updatePass = async (req, res) => {
     });
   }
 };
-
-

@@ -62,8 +62,8 @@ export const submitReport = async (req, res) => {
 
 export const abortReport = async (req, res) => {
   const user = req.user;
-  const { id } = req.query;
-  if (!mongoose.Schema.ObjectId(id)) {
+  const {id}  = req.query;
+  if (!mongoose.isValidObjectId(id)) {
     return res.status(400).json({
       message: "Invalid report id",
     });

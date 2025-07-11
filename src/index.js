@@ -2,7 +2,8 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import { connectDb } from "./utils/db.js";
-import reportRoutes from "./routes/report.route.js"
+import reportRoutes from "./routes/report.route.js";
+import relationRoutes from "./routes/relation.route.js";
 
 import passport from "passport";
 import authRoutes from "./routes/auth.route.js";
@@ -25,10 +26,11 @@ app.use(cookieParser());
 // app.use(passport.session());
 
 app.use("/api/auth", authRoutes);
-app.use("/api/report",reportRoutes)
+app.use("/api/report", reportRoutes);
+app.use("/api/relation", relationRoutes);
 
 app.listen(7777, async () => {
   neogma;
   await connectDb();
-  console.log("Server is listening on port",7777)
+  console.log("Server is listening on port", 7777);
 });
