@@ -45,7 +45,7 @@ export const submitReport = async (req, res) => {
       fromId: req.user._id,
       description,
       type,
-      mediaURL
+      mediaURL,
     });
     await report.save();
     return res.status(200).json({
@@ -62,7 +62,7 @@ export const submitReport = async (req, res) => {
 
 export const abortReport = async (req, res) => {
   const user = req.user;
-  const {id}  = req.query;
+  const { id } = req.params;
   if (!mongoose.isValidObjectId(id)) {
     return res.status(400).json({
       message: "Invalid report id",
@@ -75,13 +75,19 @@ export const abortReport = async (req, res) => {
         message: "Report not found to delete",
       });
     }
+    if (report.status !== "pending") {
+      return res.status(400).json({
+        message: "Report status is not pending",
+      });
+    }
 
-    if (report.fromId.toString !== user._id.toSrting()) {
+    if (report.fromId.toString() !== user._id.toString()) {
       return res.status(401).json({
         message: "Not authorized to abort report",
       });
     }
     report.status = "aborted";
+    await report.save();
     return res.status(200).json({
       message: "Report Aborted successfully",
     });

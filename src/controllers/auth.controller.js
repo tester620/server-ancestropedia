@@ -1,7 +1,7 @@
 import User from "../models/user.model.js";
 import validator from "validator";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import { generateToken } from "../utils/token.js";
 
 export const signup = async (req, res) => {
   const { firstName, lastName, email, password } = req.body;
@@ -49,6 +49,7 @@ export const signup = async (req, res) => {
       lastName,
     });
     await user.save();
+    generateToken(user._id, res);
     return res.status(201).json({
       message: "User created successfully",
       data: user,
@@ -61,26 +62,24 @@ export const signup = async (req, res) => {
   }
 };
 
-export const googleAuth = (req, res, next) => {
-  passport.authenticate("google", async (err, user) => {
-    if (err || !user) {
-      return res.redirect("/login");
-    }
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
+export const logout = (_, res) => {
+  try {
+    res.cookie("jwt", null, {
+      expires: new Date(Date.now()),
+      sameSite: "None",
+      secure: true,
     });
 
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
-    return res.redirect("/dashboard");
-  })(req, res, next);
+    return res
+      .status(200)
+      .json({ status: "success", message: "Logged out successfully" });
+  } catch (error) {
+    console.log("Error in logout controller", error);
+    return res
+      .status(500)
+      .json({ status: "error", message: "Internal server error" });
+  }
 };
-
 export const login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -92,13 +91,15 @@ export const login = async (req, res) => {
       });
     }
 
-    const isValid = await bcrypt.compare(password, user.password);
+    console.log(password,user?.password)
+    const isValid = await bcrypt.compare(password, user?.password);
 
     if (!isValid) {
       return res.status(400).json({
         message: "Invalid Credentials",
       });
     }
+    generateToken(user._id, res);
 
     return res.status(200).json({
       message: "Logged in Successfully",
@@ -112,37 +113,5 @@ export const login = async (req, res) => {
   }
 };
 
-export const logout = (req, res) => {
-  req.session.user = null;
-  return res.status(200).json({
-    message: "Logged out successfully",
-  });
-};
 
-export const updatePass = async (req, res) => {
-  const { oldPass, newPass } = req.body;
-  const user = req?.session?.user;
-  try {
-    if (!oldPass || !newPass) {
-      return res
-        .status(400)
-        .json({ message: "Please fill all the required feilds" });
-    }
-    if (!validator.isStrongPassword(newPass)) {
-      return res.status(400).json({
-        message: "Please enter a new strong password",
-      });
-    }
-    const isValid = await bcrypt.compare(oldPass, user.password);
-    if (!isValid) {
-      return res.status(400).json({
-        message: "Please enter correct existing password",
-      });
-    }
-  } catch (error) {
-    console.log("Error while updating the password", error);
-    return res.status(500).json({
-      message: "Internal Server Error",
-    });
-  }
-};
+

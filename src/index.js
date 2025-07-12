@@ -4,11 +4,12 @@ import cors from "cors";
 import { connectDb } from "./utils/db.js";
 import reportRoutes from "./routes/report.route.js";
 import relationRoutes from "./routes/relation.route.js";
+import profileRoutes from "./routes/profile.route.js"
 
-import passport from "passport";
 import authRoutes from "./routes/auth.route.js";
 import cookieParser from "cookie-parser";
 import { neogma } from "./config/neo4j.js";
+import { protectRoute } from "./middleware/auth.middleware.js";
 
 dotenv.config();
 const app = express();
@@ -22,12 +23,10 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
 
-// app.use(passport.initialize());
-// app.use(passport.session());
-
 app.use("/api/auth", authRoutes);
-app.use("/api/report", reportRoutes);
-app.use("/api/relation", relationRoutes);
+app.use("/api/report",protectRoute, reportRoutes);
+app.use("/api/relation",protectRoute, relationRoutes);
+app.use("/api/profile",protectRoute,profileRoutes)
 
 app.listen(7777, async () => {
   neogma;
