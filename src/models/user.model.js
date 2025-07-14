@@ -6,6 +6,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    verified:{
+      type:Boolean,
+      default:false,
+    },
     upadtesLeft: {
       type: Number,
       max: 1,
@@ -58,12 +62,21 @@ const userSchema = new mongoose.Schema(
     },
     profilePicture: {
       type: String,
-      default: process.env.DEFAULT_IMAGE_URL,
+      default: "",
     },
+
     email: {
       type: String,
       required: true,
       unique: true,
+    },
+    passToken: {
+      type: Number,
+      default: null,
+    },
+    passTokenExpires: {
+      type: Date,
+      default: null,
     },
     password: {
       type: String,

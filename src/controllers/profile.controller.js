@@ -67,3 +67,66 @@ export const updatePass = async (req, res) => {
     });
   }
 };
+
+export const treeData = async (req, res) => {
+  const {
+    fatherName,
+    motherName,
+    grandFatherName,
+    grandMotherName,
+    mGrandFatherName,
+    mGrandMotherName,
+    fatherDob,
+    fatherDod,
+    motherDob,
+    motherDod,
+    grandFatherDob,
+    grandFatherDod,
+    grandMotherDob,
+    grandMotherDod,
+    mGrandMotherDob,
+    mGrandMotherDod,
+    mGrandFatherDob,
+    mGrandFatherDod,
+  } = req.body;
+
+  if (
+    !fatherName ||
+    !motherName ||
+    !grandFatherName ||
+    !grandMotherName ||
+    !mGrandFatherName ||
+    !mGrandMotherName ||
+    !fatherDob ||
+    !fatherDod ||
+    !motherDob ||
+    !motherDod ||
+    !grandFatherDob ||
+    !grandFatherDod ||
+    !grandMotherDob ||
+    !grandMotherDod ||
+    !mGrandMotherDob ||
+    !mGrandMotherDod ||
+    !mGrandFatherDob ||
+    !mGrandFatherDod
+  ) {
+    return res.status(400).json({
+      message: "Feilds are required",
+    });
+  }
+  try {
+  } catch (error) {
+    console.log("Error in creating getTreeData", error);
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
+export const getMyData = async(req,res)=>{
+  const user = req.user;
+  return res.status(200).json({
+    message:"profile fetched successfully",
+    data:user
+  })
+}

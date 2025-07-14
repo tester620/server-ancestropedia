@@ -4,7 +4,7 @@ import { abortReport, getMyReports, submitReport } from "../controllers/report.c
 const router = express.Router();
 
 router.post("/submit",submitReport);
-router.get("/reports",getMyReports);
+router.get("/myReports",getMyReports);
 
 router.put("/abort/:id",abortReport);
 

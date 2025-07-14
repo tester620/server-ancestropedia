@@ -6,8 +6,8 @@ export const postStory = async (req, res) => {
   const { image, videoUrl, description } = req.body;
   try {
     let data = {
-      imageUrl: "",
-      videoUrl: "",
+      imageUrl: null,
+      videoUrl: null,
       description: "",
     };
     if (image) {
@@ -42,15 +42,20 @@ export const postStory = async (req, res) => {
 
 export const editPost = async (req, res) => {
   const { description } = req.body;
-  const { id } = req.query;
+  const { id } = req.params;
   try {
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({
+        message: "Invalid Post Id",
+      });
+    }
     const post = await Post.findById(id);
     if (!post) {
       return res.status(404).json({
         message: "Post not found to update",
       });
     }
-    if (post.userId) {
+    if (post.userId.toString() !== req.user._id.toString()) {
       return res.status(401).json({
         message: "Unathorized, cant edit this post",
       });
@@ -70,16 +75,42 @@ export const editPost = async (req, res) => {
   }
 };
 
+export const getMyPosts = async (req, res) => {
+  const user = req.user;
+  try {
+    const posts = await Post.find({ userId: user._id });
+    if (!posts || posts.length === 0) {
+      return res.status(404).json({
+        message: "No posts found",
+      });
+    }
+    return res.status(200).json({
+      message: "Posts fetched successfully",
+      data: posts,
+    });
+  } catch (error) {
+    console.log("Error in getting my posts");
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
 export const deletePost = async (req, res) => {
   const user = req.user;
-  const { id } = req.query;
-  if(!mongoose.isValidObjectId(id)){
+  const { id } = req.params;
+  if (!mongoose.isValidObjectId(id)) {
     return res.status(400).json({
-      message:"Invalid Post id"
-    })
+      message: "Invalid Post id",
+    });
   }
   try {
     const post = await Post.findById(id);
+    if (!post) {
+      return res.status(404).json({
+        message: "Post not found",
+      });
+    }
     if (!post.userId.toString() === user._id.toString()) {
       return res.status(401).json({
         message: "Unauthorised to delete the post",
@@ -91,7 +122,21 @@ export const deletePost = async (req, res) => {
       message: "Delete request have been made",
     });
   } catch (error) {
-    console.log("Error in deleting the post");
+    console.log("Error in deleting the post", error);
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
+export const getFamilyRelatedFeed = async (req, res) => {
+  //
+  try {
+    return res.status(200).json({
+      message: "Not Enough data to provide feed",
+    });
+  } catch (error) {
+    console.log("Error in getting familyRelatedFeed", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });

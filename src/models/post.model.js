@@ -12,6 +12,7 @@ const postSchema = mongoose.Schema(
     },
     thumbnail: {
       type: String,
+      default:null,
     },
     description: {
       type: String,
