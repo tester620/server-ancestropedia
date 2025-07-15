@@ -29,6 +29,7 @@ passport.use(
           lastName,
           email,
           verified: true,
+          googleAuth:true,
           profilePicture,
         });
 

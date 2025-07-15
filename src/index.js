@@ -5,12 +5,10 @@ import { connectDb } from "./utils/db.js";
 import cookieParser from "cookie-parser";
 import "./config/passport.js"
 
-import { neogma } from "./config/neo4j.js";
 import { protectRoute } from "./middleware/auth.middleware.js";
 import {
   authRoutes,
   profileRoutes,
-  relationRoutes,
   reportRoutes,
   userRoutes,
 } from "./routes/routes.js";
@@ -33,12 +31,11 @@ app.use("/api/ping", (_, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/report", protectRoute, reportRoutes);
-app.use("/api/relation", protectRoute, relationRoutes);
+// app.use("/api/relation", protectRoute, relationRoutes);
 app.use("/api/profile", protectRoute, profileRoutes);
 app.use("/api/user", protectRoute, userRoutes);
 
 app.listen(7777, async () => {
-  neogma;
   await connectDb();
   console.log("Server is listening on port", 7777);
 });

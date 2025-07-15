@@ -8,6 +8,7 @@ import {
   sendVerificationMail,
 } from "../utils/helper.js";
 import dotenv from "dotenv";
+import jwt from "jsonwebtoken";
 
 dotenv.config();
 
@@ -111,6 +112,11 @@ export const login = async (req, res) => {
         message: "Invalid Credentials",
       });
     }
+    if (user.googleAuth) {
+      return res.status(400).json({
+        message: "Please login using google",
+      });
+    }
     if (!user.verified) {
       const otp = await sendVerificationMail(user);
       user.verificationToken = otp;
@@ -155,6 +161,11 @@ export const resetPassToken = async (req, res) => {
         message: "User not found",
       });
     }
+    if (user.googleAuth) {
+      return res.status(400).json({
+        message: "Please login using google",
+      });
+    }
     const expiresIn = 5 * 60 * 1000;
     const otp = generateOtp();
     user.passToken = otp;
@@ -176,48 +187,95 @@ export const resetPassToken = async (req, res) => {
 export const verifyPassToken = async (req, res) => {
   const { email } = req.query;
   const { otp } = req.body;
+
   try {
     if (!email || !otp) {
-      return res.status(400).json({
-        message: "Please provide the Email and OTP both",
-      });
+      return res
+        .status(400)
+        .json({ message: "Please provide the Email and OTP both" });
     }
-    if (!otp.lenght === 6) {
-      return res.status(400).json({
-        message: "OTP must be of 6 characters only",
-      });
+
+    if (otp.length !== 6) {
+      return res.status(400).json({ message: "OTP must be of 6 digits only" });
     }
+
     if (!validator.isEmail(email)) {
-      return res.status(400).json({
-        message: "Invalid Email format",
-      });
+      return res.status(400).json({ message: "Invalid Email format" });
     }
+
     const user = await User.findOne({ email });
+
     if (!user) {
-      return res.status(404).json({
-        message: "User not found",
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (!user.passToken || user.passTokenExpires < Date.now()) {
+      return res.status(401).json({
+        message: "OTP expired or not requested. Please request a new one.",
       });
     }
 
-    if (!user.passToken || user.passTokenExpires < Date().now()) {
-      return res.status(401).json({
-        message:
-          "Either token is expired or you have not requested one. Kinldy request a new one",
-      });
+    if (user.passToken.toString() !== otp.toString()) {
+      return res.status(400).json({ message: "Incorrect OTP" });
     }
-    if (user.passToken !== otp) {
-      return res.status(400).json({
-        message: "Please enter correct OTP",
-      });
-    }
+
+    const resetToken = jwt.sign({ userId: user._id }, process.env.JWT_KEY, {
+      expiresIn: "10m",
+    });
+
     return res.status(200).json({
       message: "OTP verified successfully",
+      resetToken,
     });
   } catch (error) {
-    console.log("Error in OTP verification for Password", error);
-    return res.status(500).json({
-      message: "Internal Server Error",
+    console.error("Error in OTP verification for password reset", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const resetPassword = async (req, res) => {
+  const { token } = req.query;
+  const { newPassword } = req.body;
+
+  if (!token || !newPassword) {
+    return res
+      .status(400)
+      .json({ message: "Token and new password are required" });
+  }
+  if (!validator.isStrongPassword(newPassword)) {
+    return res.status(400).json({
+      message: "Please enter a strong password",
     });
+  }
+
+  try {
+    let decodedId;
+    try {
+      decodedId = jwt.verify(token, process.env.JWT_KEY);
+    } catch (err) {
+      return res.status(401).json({ message: "Invalid or expired token" });
+    }
+    const user = await User.findById(decodedId.userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    if (!user.passToken) {
+      return res.status(401).json({
+        message: "Unauthorized- No OTP found",
+      });
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    user.passToken = null;
+    user.passTokenExpires = null;
+
+    await user.save();
+
+    return res.status(200).json({ message: "Password reset successful" });
+  } catch (err) {
+    console.error("Password reset error", err);
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
@@ -273,3 +331,4 @@ export const verifyMailToken = async (req, res) => {
     });
   }
 };
+

@@ -4,6 +4,7 @@ import {
   login,
   logout,
   resetPassToken,
+  resetPassword,
   signup,
   verifyMailToken,
   verifyPassToken,
@@ -23,8 +24,7 @@ router.post("/mail/reset-pass",resetPassToken);
 
 router.post("/verifypassToken",verifyPassToken);
 router.post("/verifyMailToken",verifyMailToken);
-
-
+router.post("/reset-pass",resetPassword);
 
 
 router.get("/google", passport.authenticate("google", { scope: ["profile", "email"] }));

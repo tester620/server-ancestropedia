@@ -6,6 +6,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    googleAuth:{
+      type:Boolean,
+      default:false
+    },
     verified:{
       type:Boolean,
       default:false,

@@ -35,8 +35,13 @@ export const updateName = async (req, res) => {
 export const updatePass = async (req, res) => {
   const { oldPass, newPass } = req.body;
   const user = req?.user;
-  console.log(user);
+
   try {
+    if (user.googleAuth) {
+      return res.status(400).json({
+        message: "Password can't be updated for the google accounts",
+      });
+    }
     if (!oldPass || !newPass) {
       return res
         .status(400)
@@ -123,10 +128,10 @@ export const treeData = async (req, res) => {
   }
 };
 
-export const getMyData = async(req,res)=>{
+export const getMyData = async (req, res) => {
   const user = req.user;
   return res.status(200).json({
-    message:"profile fetched successfully",
-    data:user
-  })
-}
+    message: "profile fetched successfully",
+    data: user,
+  });
+};
