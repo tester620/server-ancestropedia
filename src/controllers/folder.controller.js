@@ -103,6 +103,7 @@ export const updateFolder = async (req, res) => {
     });
   }
 };
+
 export const getFolderData = async (req, res) => {
   const { folderId } = req.query;
   if (!folderId) {
