@@ -1,42 +1,33 @@
-import mongoose from "mongoose";
+import mongoose  from "mongoose";
 import { imagekit } from "../config/imagekit.js";
 import Post from "../models/post.model.js";
 
 export const postStory = async (req, res) => {
   const { image, videoUrl, description } = req.body;
   try {
-    let data = {
-      imageUrl: null,
-      videoUrl: null,
-      description: "",
-    };
+    let data = { imageUrl: null, videoUrl: null, description: "" };
     if (image) {
-      const uplaodRes = await imagekit.upload(image);
-      data.imageUrl = uplaodRes.url;
+      const uploadRes = await imagekit.upload({
+        file: image,
+        fileName: "myImage.jpg",
+      });
+      data.imageUrl = uploadRes.url;
     }
-    if (videoUrl) {
-      data.videoUrl = videoUrl;
-    }
-    if (description) {
-      data.description = description;
-    }
+    if (videoUrl) data.videoUrl = videoUrl;
+    if (description) data.description = description;
     const newPost = new Post({
       userId: req.user._id,
-      videoUrl: data?.videoUrl,
-      imageUrl: data?.imageUrl,
-      description: data?.description,
+      videoUrl: data.videoUrl,
+      imageUrl: data.imageUrl,
+      description: data.description,
     });
-
     await newPost.save();
-    return res.status(201).json({
-      message: "Post submitted successfully",
-      data: newPost,
-    });
+    return res
+      .status(201)
+      .json({ message: "Post submitted successfully", data: newPost });
   } catch (error) {
     console.log("Error in uploading post", error);
-    return res.status(500).json({
-      message: "Internal Server Error",
-    });
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 };
 

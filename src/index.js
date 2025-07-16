@@ -3,13 +3,17 @@ import dotenv from "dotenv";
 import cors from "cors";
 import { connectDb } from "./utils/db.js";
 import cookieParser from "cookie-parser";
-import "./config/passport.js"
+import "./config/passport.js";
 
 import { protectRoute } from "./middleware/auth.middleware.js";
 import {
   authRoutes,
+  folderRoutes,
+  orderRoutes,
   profileRoutes,
   reportRoutes,
+  requestRoutes,
+  treeRoutes,
   userRoutes,
 } from "./routes/routes.js";
 
@@ -31,9 +35,13 @@ app.use("/api/ping", (_, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/report", protectRoute, reportRoutes);
-// app.use("/api/relation", protectRoute, relationRoutes);
 app.use("/api/profile", protectRoute, profileRoutes);
 app.use("/api/user", protectRoute, userRoutes);
+app.use("/api/user/tree", protectRoute, treeRoutes);
+app.use("/api/user/order", protectRoute, orderRoutes);
+app.use("/api/user/folder", protectRoute, folderRoutes);
+app.use("/api/user/request", protectRoute, requestRoutes);
+
 
 app.listen(7777, async () => {
   await connectDb();

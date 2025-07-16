@@ -14,9 +14,9 @@ export const neogma = new Neogma(
 
 neogma.driver.verifyConnectivity()
   .then(() => {
-    console.log("✅ Connected to Neo4j database successfully!");
+    console.log("Connected to Neo4j database successfully!");
   })
   .catch((error) => {
-    console.error("❌ Failed to connect to Neo4j:", error);
+    console.error("Failed to connect to Neo4j:", error);
     process.exit(1); 
   });

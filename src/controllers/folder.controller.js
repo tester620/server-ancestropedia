@@ -1,0 +1,316 @@
+import mongoose from "mongoose";
+import { imagekit } from "../config/imagekit.js";
+import Folder from "../models/folder.model.js";
+import Post from "../models/post.model.js";
+
+export const createFolder = async (req, res) => {
+  const { name } = req.body;
+  try {
+    if (!name || !name.trim()) {
+      return res.status(400).json({
+        message: "Name of the folder is required",
+      });
+    }
+    if (name.length > 15 || name.length < 3) {
+      return res.status(400).json({
+        message: "Name of the folder should be in between 3 and 15 characters",
+      });
+    }
+
+    const folder = new Folder({
+      createdBy: req.user._id,
+      name,
+    });
+    await folder.save();
+    return res.status(201).json({
+      message: `${name} Folder Created`,
+      data: folder,
+    });
+  } catch (error) {
+    console.log("Error in creating folder", error);
+    return res.status(500).json({
+      messagfe: "Internal Server Erro",
+    });
+  }
+};
+
+export const getMyFolders = async (req, res) => {
+  try {
+    const folders = await Folder.find({
+      createdBy: req.user._id,
+    });
+    if (!folders || !folders.length) {
+      return res.status(404).json({
+        message: "No folders found",
+      });
+    }
+    return res.status(200).json({
+      message: "Folders fetched successfully",
+      adta: folders,
+    });
+  } catch (error) {
+    console.log("Error in fetching the folders", error);
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
+export const updateFolder = async (req, res) => {
+  const { folderId } = req.query;
+  const { name, image } = req.body;
+  try {
+    if (name.trim() && (name.length > 15 || name.length < 3)) {
+      return res.status(400).json({
+        message: "Name of the folder should be in between 3 and 15 characters",
+      });
+    }
+    if ((!name || !name.trim()) && !image) {
+      return res.status(400).json({
+        message: "Please fill atleast one feild",
+      });
+    }
+    const folder = await Folder.findById(folderId);
+    if (!folder) {
+      return res.status(400).json({
+        message: "Folder not found",
+      });
+    }
+    if (folder.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(401).json({
+        message: "Unauthorised can't edit someone's folder",
+      });
+    }
+    if (image) {
+      const uploadRes = await imagekit.upload({
+        file: image,
+        fileName: "myImage.jpg",
+      });
+      folder.thumbnail = uploadRes.url;
+    }
+    if (name) {
+      folder.name = name;
+    }
+    await folder.save();
+    return res.status(200).json({
+      message: "Folder updated successfully",
+      data: folder,
+    });
+  } catch (error) {
+    console.log("Error in upadting the folder", error);
+    return res.status(500).json({
+      message: "Internal Sever Error",
+    });
+  }
+};
+export const getFolderData = async (req, res) => {
+  const { folderId } = req.query;
+  if (!folderId) {
+    return res.status(400).json({
+      message: "Folder id is required",
+    });
+  }
+  if (!mongoose.isValidObjectId(folderId)) {
+    return res.status(400).json({
+      message: "Invalid Folder Id",
+    });
+  }
+  try {
+    const folder = await Folder.findById(folderId);
+    if (!folder) {
+      return res.status(404).json({
+        message: "Folder not found",
+      });
+    }
+    if (folder.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(401).json({
+        message: "Unauthorized- Can't view other's folder ",
+      });
+    }
+
+    await folder.populate("posts");
+    return res.status(200).json({
+      message: "Folder data fetched succesfully",
+      data: folder,
+    });
+  } catch (error) {
+    console.log("Error in getting the data of folder with id", error);
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
+export const removeFolder = async (req, res) => {
+  const { folderId } = req.body;
+  try {
+    if (!folderId) {
+      return res.status(400).json({
+        message: "Folder Id is required",
+      });
+    }
+    if (!mongoose.isValidObjectId(folderId)) {
+      return res.status(400).json({
+        message: "Invalid Folder Id",
+      });
+    }
+
+    const folder = await Folder.findById(folderId);
+    if (!folder) {
+      return res.status(404).json({
+        message: "Folder not found",
+      });
+    }
+    if (folder.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(401).json({
+        message: "Unauthorized- Can't remove other's folder",
+      });
+    }
+    await Folder.findByIdAndDelete(folderId);
+    return res.status(202).json({
+      message: "Folder delete request made successfully",
+    });
+  } catch (error) {
+    console.log("Error in removing the folder", error);
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
+export const addPosts = async (req, res) => {
+  try {
+    const { postIds, folderId } = req.body;
+
+    if (!postIds || !Array.isArray(postIds) || !folderId) {
+      return res.status(400).json({ message: "Invalid request payload" });
+    }
+
+    if (!postIds.length) {
+      return res
+        .status(400)
+        .json({ message: "Posts are required to add in folder" });
+    }
+
+    const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
+    const filteredPostIds = [
+      ...new Set(postIds.filter((id) => isValidObjectId(id))),
+    ];
+
+    if (filteredPostIds.length !== postIds.length) {
+      return res
+        .status(400)
+        .json({ message: "One or more post IDs are invalid or duplicated" });
+    }
+
+    const posts = await Post.find({ _id: { $in: filteredPostIds } });
+
+    if (posts.length !== filteredPostIds.length) {
+      return res.status(404).json({ message: "One or more posts not found" });
+    }
+
+    const unauthorizedPost = posts.find(
+      (post) => post.userId.toString() !== req.user._id.toString()
+    );
+    if (unauthorizedPost) {
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to add some of these posts" });
+    }
+
+    const folder = await Folder.findById(folderId);
+    if (!folder) {
+      return res.status(404).json({ message: "Folder not found" });
+    }
+
+    if (folder.createdBy.toString() !== req.user._id.toString()) {
+      return res
+        .status(401)
+        .json({ message: "Unauthorized - Cannot modify this folder" });
+    }
+
+    const existingPostIds = folder.posts.map((p) => p.toString());
+    const newPostIds = filteredPostIds.filter(
+      (id) => !existingPostIds.includes(id)
+    );
+
+    if (newPostIds.length === 0) {
+      return res.status(400).json({
+        message: "All selected posts already exist in the folder",
+      });
+    }
+
+    folder.posts.push(...newPostIds);
+    await folder.save();
+
+    return res.status(200).json({
+      message: "Posts added to folder successfully",
+      folder,
+    });
+  } catch (error) {
+    console.error("addPosts Error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const removeFiles = async (req, res) => {
+  const { postIds, folderId } = req.body;
+
+  try {
+    if (!postIds || !Array.isArray(postIds) || !postIds.length) {
+      return res.status(400).json({
+        message: "Post ids are required",
+      });
+    }
+
+    const isValidMongoObjectId = (id) => mongoose.isValidObjectId(id);
+    const filteredPostIds = [...new Set(postIds.filter(isValidMongoObjectId))];
+
+    const posts = await Post.find({ _id: { $in: filteredPostIds } });
+    if (posts.length !== filteredPostIds.length) {
+      return res.status(404).json({ message: "One or more posts not found" });
+    }
+
+    const unauthorizedPost = posts.find(
+      (post) => post.userId.toString() !== req.user._id.toString()
+    );
+    if (unauthorizedPost) {
+      return res.status(403).json({
+        message: "You are not authorized to modify some of these posts",
+      });
+    }
+
+    const folder = await Folder.findById(folderId);
+    if (!folder) {
+      return res.status(404).json({ message: "Folder not found" });
+    }
+
+    if (folder.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(401).json({
+        message: "Unauthorized - Cannot modify this folder",
+      });
+    }
+
+    const initialLength = folder.posts.length;
+
+    folder.posts = folder.posts.filter(
+      (id) => !filteredPostIds.includes(id.toString())
+    );
+
+    if (folder.posts.length === initialLength) {
+      return res.status(400).json({
+        message: "No selected posts were found in the folder",
+      });
+    }
+
+    await folder.save();
+
+    return res.status(200).json({
+      message: "Posts removed from folder successfully",
+      folder,
+    });
+  } catch (error) {
+    console.error("Error removing posts:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
