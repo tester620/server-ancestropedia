@@ -5,19 +5,7 @@ import userRoutes from "./user.route.js";
 import orderRoutes from "./order.route.js";
 import requestRoutes from "./request.route.js";
 import treeRoutes from "./tree.route.js";
-import folderRoutes from "./folder.route.js";
-import notificationRoutes from "./notification.route.js";
-import sampleTreeRoutes from "./sample.tree.route.js";
+import folderRoutes from "./folder.route.js"
+import notificationRoutes from "./notification.route.js"
 
-export {
-  reportRoutes,
-  profileRoutes,
-  authRoutes,
-  userRoutes,
-  orderRoutes,
-  requestRoutes,
-  sampleTreeRoutes,
-  treeRoutes,
-  folderRoutes,
-  notificationRoutes,
-};
+export { reportRoutes, profileRoutes, authRoutes, userRoutes, orderRoutes,requestRoutes,treeRoutes,folderRoutes,notificationRoutes};
