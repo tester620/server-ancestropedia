@@ -6,5 +6,6 @@ import orderRoutes from "./order.route.js";
 import requestRoutes from "./request.route.js";
 import treeRoutes from "./tree.route.js";
 import folderRoutes from "./folder.route.js"
+import notificationRoutes from "./notification.route.js"
 
-export { reportRoutes, profileRoutes, authRoutes, userRoutes, orderRoutes,requestRoutes,treeRoutes,folderRoutes};
+export { reportRoutes, profileRoutes, authRoutes, userRoutes, orderRoutes,requestRoutes,treeRoutes,folderRoutes,notificationRoutes};

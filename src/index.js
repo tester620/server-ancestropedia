@@ -9,6 +9,7 @@ import { protectRoute } from "./middleware/auth.middleware.js";
 import {
   authRoutes,
   folderRoutes,
+  notificationRoutes,
   orderRoutes,
   profileRoutes,
   reportRoutes,
@@ -41,6 +42,7 @@ app.use("/api/user/tree", protectRoute, treeRoutes);
 app.use("/api/user/order", protectRoute, orderRoutes);
 app.use("/api/user/folder", protectRoute, folderRoutes);
 app.use("/api/user/request", protectRoute, requestRoutes);
+app.use("/api/user/notification", protectRoute, notificationRoutes);
 
 
 app.listen(7777, async () => {
