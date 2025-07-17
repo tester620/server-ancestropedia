@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import Request from "../models/request.model.js";
+import User from "../models/user.model.js";
 
 export const sendRequest = async (req, res) => {
   const { type, userId } = req.body;
@@ -19,6 +20,12 @@ export const sendRequest = async (req, res) => {
         message: "Invalid type for the request",
       });
     }
+    const user = await User.findById(userId);
+    if(!user){
+      return res.status(404).json({
+        message:"User not found to send request"
+      })
+    }
 
     const exisitingRequest = await Request.findOne({
       $or: [
@@ -26,7 +33,6 @@ export const sendRequest = async (req, res) => {
         { fromUser: userId, toUser: req.user._id },
       ],
     });
-
     if (exisitingRequest) {
       return res.status(400).json({
         message: "Request already made",

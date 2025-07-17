@@ -315,3 +315,88 @@ export const removeFiles = async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+
+export const createInFolder = async (req, res) => {
+  const { image, description, videoUrl, folderId } = req.body;
+  try {
+    if (!folderId || !mongoose.isValidObjectId(folderId)) {
+      return res.status(400).json({
+        message: "Valid Folder Id is required",
+      });
+    }
+    if (!image && !description && !videoUrl) {
+      return res.status(400).json({
+        message: "Please fill atleast one feild",
+      });
+    }
+
+    const folder = await Folder.findById(folderId);
+    if (!folder) {
+      return res.status(400).json({
+        message: "Folder not found",
+      });
+    }
+
+    if (folder.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(401).json({
+        message: "Unauthorizedd- Can't add posts to someone else's folder",
+      });
+    }
+
+    let newPost = new Post({
+      userId: req.user._id,
+    });
+    if (image) {
+      const uploadRes = await imagekit.upload({
+        file: image,
+        fileName: "myImage.jpg",
+      });
+      newPost.imageUrl = uploadRes.url;
+      newPost.imageFileId = uploadRes.fileId;
+    }
+    if (description) newPost.description = description;
+    if (videoUrl) newPost.videoUrl = videoUrl;
+    await newPost.save();
+    folder.posts.push(newPost._id);
+    await folder.save();
+    return res.status(201).json({
+      message: "New post Created",
+      data: newPost,
+    });
+  } catch (error) {
+    console.log("Error in creating post in folder", error);
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
+export const deletePost = async (req, res) => {
+  const { postId } = req.query;
+  try {
+    if (!postId || !mongoose.isValidObjectId(postId)) {
+      return res.status(400).json({
+        message: "Please enter a valid post id",
+      });
+    }
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(400).json({
+        message: "Post not found",
+      });
+    }
+    if (post.userId.toString() !== req.user._id.toString()) {
+      return res.status(401).json({
+        message: "Unauthorized- Can't delete someone's posts",
+      });
+    }
+    if(post.imageUrl){
+      await imagekit.deleteFile(imageUrl)
+    }
+  } catch (error) {
+    console.log("Error in deleting the post", error);
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};

@@ -12,7 +12,15 @@ const postSchema = mongoose.Schema(
     },
     thumbnail: {
       type: String,
-      default:null,
+      default: null,
+    },
+    videoFileId: {
+      type: String,
+      default: null,
+    },
+    imageFileId: {
+      type: String,
+      default: null,
     },
     description: {
       type: String,

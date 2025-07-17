@@ -14,6 +14,20 @@ export const placeDnaOrder = async (req, res) => {
     }
 };
 
+// export const placeTreeOrder = async(req,res)=>{
+//   const {data} = req.body;
+//   try {
+//     if(!data){
+//       return res.status(400).json({
+//         message:"Data is required"
+//       })
+//     }
+//     const newOrder = new TreeArtModel.
+//   } catch (error) {
+    
+//   }
+// }
+
 export const getMyDNAOrders = async (req, res) => {
   const user = req.user;
   try {

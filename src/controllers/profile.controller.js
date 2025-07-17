@@ -1,6 +1,7 @@
 import User from "../models/user.model.js";
 import validator from "validator";
 import bcrypt from "bcryptjs";
+import { imagekit } from "../config/imagekit.js";
 
 export const updateName = async (req, res) => {
   const { newName } = req.body;
@@ -72,6 +73,22 @@ export const updatePass = async (req, res) => {
     });
   }
 };
+
+export const updateDp = async(req,res)=>{
+  const {image} = req.query;
+
+  try {
+    if(!image){
+      return res.status(400).json({
+        message:"Image is required"
+      })
+    }
+    const res = await imagekit.upload()
+    
+  } catch (error) {
+    
+  }
+}
 
 export const treeData = async (req, res) => {
   const {
