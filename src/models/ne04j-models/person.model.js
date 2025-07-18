@@ -1,45 +1,48 @@
 import { ModelFactory } from "neogma";
 import { neogma } from "../../config/neo4j.js";
 
-const Person = ModelFactory(
+export const Person = ModelFactory(
   {
     label: "Person",
     schema: {
       id: { type: "string", required: true },
       firstName: { type: "string", required: true },
       lastName: { type: "string", required: true },
-      gender: { type: "string" },
-      dob: { type: "string" },
-      birthplace: { type: "string" },
-      profileImage: { type: "string" },
-      createdBy: { type: "string", required: true },
-      // Removed treeId - relationships should be through graph connections
+      dob: { type: "string", required: true },
+      living: { type: "boolean", required: true },
+      dod: { type: "string", optional: true },
+      profileImage: { type: "string", optional: true },
+      gender: { type: "string", required: true },
+      treeId: { type: "string", optional: true },
+      createdAt: { type: "string", required: true },
+      updatedAt: { type: "string", required: true },
     },
     primaryKeyField: "id",
-    relationships: {
-      belongsTo: {
-        model: "FamilyTree",
-        direction: "out",
-        name: "BELONGS_TO",
-      },
-      parentOf: {
-        model: "Person",
-        direction: "out",
-        name: "PARENT_OF",
-      },
-      marriedTo: {
-        model: "Person",
-        direction: "out",
-        name: "MARRIED_TO",
-      },
-      childOf: {
-        model: "Person",
-        direction: "out",
-        name: "CHILD_OF",
-      },
-    },
+    relationships: {},
   },
   neogma
 );
 
-export default Person;
+Person.addRelationships({
+  parents: {
+    model: Person,
+    direction: "in",
+    name: "PARENT_OF",
+    properties: {},
+    eager: false,
+  },
+  children: {
+    model: Person,
+    direction: "out",
+    name: "PARENT_OF",
+    properties: {},
+    eager: false,
+  },
+  spouse: {
+    model: Person,
+    direction: "both",
+    name: "SPOUSE_OF",
+    properties: {},
+    eager: false,
+  },
+});

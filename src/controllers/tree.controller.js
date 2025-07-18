@@ -1,66 +1,139 @@
 import { v4 as uuidv4 } from "uuid";
-import FamilyTree from "../models/ne04j-models/tree.model.js";
-import Person from "../models/ne04j-models/person.model.js";
-import { neogma } from "../config/neo4j.js";
+import { FamilyTree } from "../models/ne04j-models/tree.model.js";
+import { Person } from "../models/ne04j-models/person.model.js";
 
 export const createTree = async (req, res) => {
-  const user = req.user;
-
   try {
-    const treeId = uuidv4();
-    const personId = uuidv4();
+    const { ownerId } = req.body;
+    if (!ownerId || typeof ownerId !== "string") {
+      return res.status(400).json({
+        message: "Valid owner id is required",
+      });
+    }
 
-    // Create transaction for atomic operations
-    const result = await neogma.queryRunner.runInTransaction(async (tx) => {
-      // Create Family Tree node
-      const newTree = await FamilyTree.createOne(
-        {
-          id: treeId,
-          name: `${user.lastName}'s Tree`,
-          createdBy: user._id.toString(),
-          createdAt: new Date().toISOString(),
-        },
-        { transaction: tx }
-      );
+    const owner = await Person.findOne({ where: { id: ownerId } });
+    if (!owner) {
+      return res.status(404).json({
+        message: "Owner not found",
+      });
+    }
 
-      // Create Person node
-      const personNode = await Person.createOne(
-        {
-          id: personId,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          gender: user.gender || "",
-          dob: user.dob || "",
-          birthplace: user.birthplace || "",
-          createdBy: user._id.toString(),
-        },
-        { transaction: tx }
-      );
+    const treeData = {
+      name: `${owner.lastName}'s Tree`,
+      id: uuidv4(),
+      ownerId: ownerId.trim(),
+      createdAt: new Date().toISOString(),
+    };
 
-      // Create BELONGS_TO relationship
-      await personNode.relateTo(
-        {
-          alias: "belongsTo",
-          where: {
-            id: newTree.id,
-          },
-        },
-        { transaction: tx }
-      );
+    const tree = await FamilyTree.createOne(treeData);
 
-      return { newTree, personNode };
+    return res.status(201).json({
+      message: "Family tree created successfully",
+      data: tree,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+export const addPersonToTree = async (req, res) => {
+  try {
+    const { treeId, personId, relatedToPersonId, role } = req.body;
+
+    if (!treeId || typeof treeId !== "string") {
+      return res
+        .status(400)
+        .json({ message: "treeId is required and must be a string" });
+    }
+    if (!personId || typeof personId !== "string") {
+      return res
+        .status(400)
+        .json({ message: "personId is required and must be a string" });
+    }
+
+    const tree = await FamilyTree.findOne({ where: { id: treeId } });
+    if (!tree) {
+      return res.status(404).json({ message: "FamilyTree not found" });
+    }
+
+    const person = await Person.findOne({ where: { id: personId } });
+    if (!person) {
+      return res.status(404).json({ message: "Person not found" });
+    }
+
+    await tree.relateTo({
+      alias: "members",
+      where: { id: personId },
     });
 
-    res.status(201).json({
-      message: "Family tree created successfully",
-      tree: result.newTree,
-      rootPerson: result.personNode,
+    if (role && relatedToPersonId) {
+      const validRoles = ["father", "mother", "child", "spouse"];
+      if (!validRoles.includes(role)) {
+        return res.status(400).json({
+          message: "Invalid role. Must be one of " + validRoles.join(", "),
+        });
+      }
+
+      const relatedPerson = await Person.findOne({
+        where: { id: relatedToPersonId },
+      });
+      if (!relatedPerson) {
+        return res.status(404).json({ message: "Related person not found" });
+      }
+
+      if (role === "father" || role === "mother") {
+        // (parent)-[:PARENT_OF]->(child)
+        await relatedPerson.relateTo({
+          alias: "children",
+          where: { id: personId },
+        });
+      } else if (role === "child") {
+        // (person)-[:PARENT_OF]->(relatedPerson)
+        await person.relateTo({
+          alias: "children",
+          where: { id: relatedToPersonId },
+        });
+      } else if (role === "spouse") {
+        // (person)-[:SPOUSE_OF]->(relatedPerson)
+        await person.relateTo({
+          alias: "spouse",
+          where: { id: relatedToPersonId },
+        });
+      }
+    }
+
+    return res.status(200).json({
+      message: "Person added to family tree successfully",
+      data: {
+        treeId,
+        personId,
+      },
+    });
+  } catch (err) {
+    console.error("Error in addPersonToFamilyTree:", err);
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+export const getMyTree = async (req, res) => {
+  try {
+    const tree = await FamilyTree.findOne({
+      where: { ownerId: req.user._id.toString() },
+    });
+    if (!tree) {
+      return res.status(404).json({
+        message: "Tree not found. Please create a new one",
+      });
+    }
+    return res.status(200).json({
+      message: "Tree fetched successfully",
+      data: tree,
     });
   } catch (error) {
-    console.error("Create Tree Error:", error);
-    res.status(500).json({
+    console.log("Error in getting my tree", error);
+    return res.status(500).json({
       message: "Internal Server Error",
-      error: error.message,
     });
   }
 };

@@ -391,7 +391,7 @@ export const deletePost = async (req, res) => {
       });
     }
     if(post.imageUrl){
-      await imagekit.deleteFile(imageUrl)
+      await imagekit.deleteFile(post.imageFileId)
     }
   } catch (error) {
     console.log("Error in deleting the post", error);

@@ -16,6 +16,7 @@ import {
   requestRoutes,
   treeRoutes,
   userRoutes,
+  personRoutes,
 } from "./routes/routes.js";
 
 dotenv.config();
@@ -39,11 +40,11 @@ app.use("/api/report", protectRoute, reportRoutes);
 app.use("/api/profile", protectRoute, profileRoutes);
 app.use("/api/user", protectRoute, userRoutes);
 app.use("/api/user/tree", protectRoute, treeRoutes);
+app.use("/api/user/tree/person", protectRoute, personRoutes);
 app.use("/api/user/order", protectRoute, orderRoutes);
 app.use("/api/user/folder", protectRoute, folderRoutes);
 app.use("/api/user/request", protectRoute, requestRoutes);
 app.use("/api/user/notification", protectRoute, notificationRoutes);
-
 
 app.listen(7777, async () => {
   await connectDb();
