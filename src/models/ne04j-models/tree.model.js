@@ -14,7 +14,7 @@ export const FamilyTree = ModelFactory(
     primaryKeyField: "id",
     relationships: {
       members: {
-        model: () => Person,
+        model: Person,
         direction: "out",
         name: "HAS_MEMBER",
         properties: {},

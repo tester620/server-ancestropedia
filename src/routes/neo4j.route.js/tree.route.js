@@ -1,6 +1,7 @@
 import express from "express";
 import {
   addPersonToTree,
+  changeTreeName,
   createTree,
   getMyTree,
 } from "../../controllers/tree.controller.js";
@@ -12,5 +13,6 @@ router.post("/create", createTree);
 router.post("/create/owner", createOwner);
 router.post("/addMember", addPersonToTree);
 router.get("/myTree", getMyTree);
+router.put("/update", changeTreeName);
 
 export default router;
