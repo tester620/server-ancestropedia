@@ -1,10 +1,9 @@
 import { v4 as uuidv4 } from "uuid";
-import { FamilyTree } from "../models/ne04j-models/tree.model.js";
-import { Person } from "../models/ne04j-models/person.model.js";
-import { neogma } from "../config/neo4j.js";
+import { FamilyTree } from "../../models/ne04j-models/tree.model.js";
+import { Person } from "../../models/ne04j-models/person.model.js";
+import { neogma } from "../../config/neo4j.js";
+import { redis } from "../../config/redis.js";
 
-
-//after creating the tree, add a realtion of the user with the tree and also addTreeId to the person
 export const createTree = async (req, res) => {
   try {
     const { ownerId } = req.body;
@@ -40,7 +39,6 @@ export const createTree = async (req, res) => {
   }
 };
 
-//add person.treeId = treeId after the successfully addition to the tree
 export const addPersonToTree = async (req, res) => {
   try {
     const { treeId, personId, relatedToPersonId, role } = req.body;
@@ -82,6 +80,10 @@ export const addPersonToTree = async (req, res) => {
        MERGE (t)-[:HAS_MEMBER]->(p)`,
       { treeId, personId }
     );
+    await neogma.queryRunner.run(
+      `MATCH (p:Person {id: $personId}) SET p.treeId = $treeId`,
+      { personId, treeId }
+    );
 
     if (role && relatedToPersonId) {
       if (personId === relatedToPersonId) {
@@ -97,11 +99,16 @@ export const addPersonToTree = async (req, res) => {
         });
       }
 
-      const relatedInTree = await neogma.queryRunner.run(
-        `MATCH (t:FamilyTree {id: $treeId})-[:HAS_MEMBER]->(p:Person {id: $relatedToPersonId})
-         RETURN p`,
-        { treeId, relatedToPersonId }
-      );
+      let relatedInTree;
+      if (relatedToPersonId === tree.ownerId) {
+        relatedInTree = { records: [{}] };
+      } else {
+        relatedInTree = await neogma.queryRunner.run(
+          `MATCH (t:FamilyTree {id: $treeId})-[:HAS_MEMBER]->(p:Person {id: $relatedToPersonId})
+           RETURN p`,
+          { treeId, relatedToPersonId }
+        );
+      }
       if (relatedInTree.records.length === 0) {
         return res.status(400).json({
           message: "Related person not in this tree",
@@ -186,14 +193,24 @@ export const addPersonToTree = async (req, res) => {
 
 export const getMyTree = async (req, res) => {
   try {
+    const cacheKey = `tree:${req.user._id.toString()}`;
+    const cachedData = await redis.get(cacheKey);
+    if (cachedData) {
+      return res.status(200).json({
+        message: "Tree fetched successfully (from cache)",
+        data: JSON.parse(cachedData),
+      });
+    }
     const tree = await FamilyTree.findOne({
       where: { ownerId: req.user._id.toString() },
     });
+
     if (!tree) {
       return res.status(404).json({
         message: "Tree not found. Please create a new one",
       });
     }
+    await redis.set(cacheKey, JSON.stringify(tree), "EX", 360);
     return res.status(200).json({
       message: "Tree fetched successfully",
       data: tree,
@@ -233,6 +250,61 @@ export const changeTreeName = async (req, res) => {
     });
   } catch (error) {
     console.log("Error in updating the name of tree", error);
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
+export const getMyCompleteTree = async (req, res) => {
+  try {
+    const cacheKey = `completeTree:${req.user._id.toString()}`;
+    const cachedData = await redis.get(cacheKey);
+    if (cachedData) {
+      return res.status(200).json({
+        message: "Tree successfully fetched (from cache)",
+        data: JSON.parse(cachedData),
+      });
+    }
+
+    const myTree = await FamilyTree.findOne({
+      where: { ownerId: req.user._id.toString() },
+    });
+    if (!myTree) {
+      return res.status(404).json({
+        message: "Tree not found. Please create a new one",
+      });
+    }
+
+    const treeId = myTree.id;
+
+    const result = await neogma.queryRunner.run(
+      `
+      MATCH (t:FamilyTree {id: $treeId})-[:HAS_MEMBER]->(member:Person)
+      OPTIONAL MATCH path = (member)-[:PARENT_OF|SPOUSE_OF*0..5]-(other:Person)
+      WITH collect(DISTINCT member) + collect(DISTINCT other) as people, collect(DISTINCT relationships(path)) as relations
+      UNWIND people as person
+      RETURN collect(DISTINCT person) as allPeople, apoc.coll.flatten(relations) as allRelations
+      `,
+      { treeId }
+    );
+
+    const allPeople = result.records?.[0]?.get("allPeople") || [];
+    const allRelations = result.records?.[0]?.get("allRelations") || [];
+
+    const responseData = {
+      people: allPeople,
+      relations: allRelations,
+    };
+    await redis.set(cacheKey, JSON.stringify(responseData), "EX", 3600);
+
+    return res.status(200).json({
+      message:
+        "Family tree with all members and relationships fetched successfully",
+      data: responseData,
+    });
+  } catch (error) {
+    console.log("Error in getting the complete tree", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });

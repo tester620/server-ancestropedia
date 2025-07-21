@@ -4,6 +4,7 @@ import cors from "cors";
 import { connectDb } from "./utils/db.js";
 import cookieParser from "cookie-parser";
 import "./config/passport.js";
+import {  redis } from "./config/redis.js";
 
 import { protectRoute } from "./middleware/auth.middleware.js";
 import {
@@ -48,5 +49,6 @@ app.use("/api/user/notification", protectRoute, notificationRoutes);
 
 app.listen(7777, async () => {
   await connectDb();
+  await redis.connect();
   console.log("Server is listening on port", 7777);
 });

@@ -4,6 +4,7 @@ import { createPerson, treeMergeController } from "../../controllers/neogma.cont
 const router = express.Router();
 
 router.post("/create", createPerson);
-router.post("/searchAndMerge",treeMergeController)
+router.post("/searchAndMerge",treeMergeController);
+
 
 export default router;
