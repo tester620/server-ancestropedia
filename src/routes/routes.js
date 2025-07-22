@@ -8,9 +8,12 @@ import treeRoutes from "./neo4j.route/tree.route.js";
 import personRoutes from "./neo4j.route/person.route.js";
 import folderRoutes from "./folder.route.js";
 import notificationRoutes from "./notification.route.js";
+import supportRoutes from "./support.route.js";
+import adminRoutes from "./admin/index.js";
 
 export {
   reportRoutes,
+  adminRoutes,
   profileRoutes,
   authRoutes,
   userRoutes,
@@ -20,4 +23,5 @@ export {
   treeRoutes,
   notificationRoutes,
   personRoutes,
+  supportRoutes,
 };

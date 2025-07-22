@@ -218,3 +218,42 @@ export const treeMergeController = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
+//In this we need to get the relations also, spouse relations and child relations and after that we need to get the dates , so that we can send then with the data and we can use them in ui for the events tracking and other details
+//and also if the person is related to the user somehow (upto 7 gen) allow him to view the person details otherwise don't allow
+export const getPersonById = async (req, res) => {
+  const { personId } = req.params;
+  const user = req.user;
+
+  try {
+    if (!personId || typeof personId !== "string") {
+      return res.status(400).json({
+        message: "Valid personId is required",
+      });
+    }
+    if (user.viewsLeft < 1) {
+      return res.status(401).json({
+        message:
+          "Your have no tokens. Kindly buy them and then see the profile of the person",
+      });
+    }
+    const person = Person.findOne({ where: { id: personId } });
+    if (!personId) {
+      return res.status(404).json({
+        message: "Person not found",
+      });
+    }
+    user.viewsLeft = user.viewsLeft - 1;
+    await user.save();
+
+    return res.status(200).json({
+      message: "Person data fetched successfully",
+      data: person,
+    });
+  } catch (error) {
+    console.log("Error in getting person details", error);
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};

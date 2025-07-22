@@ -83,6 +83,7 @@ export const getRequests = async (req, res) => {
   }
 };
 
+//review request for the user and store the access in the database for 
 export const reviewRequest = async (req, res) => {
   const { requestId } = req.params;
   const { status } = req.body;

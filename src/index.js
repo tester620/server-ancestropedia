@@ -4,7 +4,7 @@ import cors from "cors";
 import { connectDb } from "./utils/db.js";
 import cookieParser from "cookie-parser";
 import "./config/passport.js";
-import {  redis } from "./config/redis.js";
+import { redis } from "./config/redis.js";
 
 import { protectRoute } from "./middleware/auth.middleware.js";
 import {
@@ -18,6 +18,8 @@ import {
   treeRoutes,
   userRoutes,
   personRoutes,
+  supportRoutes,
+  adminRoutes,
 } from "./routes/routes.js";
 
 dotenv.config();
@@ -37,6 +39,8 @@ app.use("/api/ping", (_, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api", adminRoutes);
+app.use("/api/support", supportRoutes);
 app.use("/api/report", protectRoute, reportRoutes);
 app.use("/api/profile", protectRoute, profileRoutes);
 app.use("/api/user", protectRoute, userRoutes);
