@@ -20,6 +20,7 @@ import {
   personRoutes,
   supportRoutes,
   adminRoutes,
+  addressRoutes,
 } from "./routes/routes.js";
 
 dotenv.config();
@@ -44,6 +45,7 @@ app.use("/api/support", supportRoutes);
 app.use("/api/report", protectRoute, reportRoutes);
 app.use("/api/profile", protectRoute, profileRoutes);
 app.use("/api/user", protectRoute, userRoutes);
+app.use("/api/user/address", protectRoute, addressRoutes);
 app.use("/api/user/tree", protectRoute, treeRoutes);
 app.use("/api/user/tree/person", protectRoute, personRoutes);
 app.use("/api/user/order", protectRoute, orderRoutes);

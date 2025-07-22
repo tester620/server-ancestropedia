@@ -6,6 +6,8 @@ import { sendReportReviewMail } from "../../utils/helper.js";
 
 //add pagination.limit and offset
 export const getAllReports = async (req, res) => {
+  const page = req.body.page || 1;
+  const limit = req.body.limit || 5;
   try {
     const allReports = await Report.find({}).sort({ createdAt: -1 });
     if (!allReports || !allReports.length) {

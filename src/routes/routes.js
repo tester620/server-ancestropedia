@@ -10,6 +10,7 @@ import folderRoutes from "./folder.route.js";
 import notificationRoutes from "./notification.route.js";
 import supportRoutes from "./support.route.js";
 import adminRoutes from "./admin/index.js";
+import addressRoutes from "./adress.route.js"
 
 export {
   reportRoutes,
@@ -24,4 +25,5 @@ export {
   notificationRoutes,
   personRoutes,
   supportRoutes,
+  addressRoutes
 };
