@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import logger from "../../config/logger.js";
 import SupportMessage from "../../models/support.model.js";
 
 export const getSupportMessage = async (req, res) => {
@@ -45,7 +46,7 @@ export const getAllMessages = async (req, res) => {
       data: allMessages,
     });
   } catch (error) {
-    console.log("Error in getting all the messages", error);
+    logger.error("Error in getting all the messages", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });

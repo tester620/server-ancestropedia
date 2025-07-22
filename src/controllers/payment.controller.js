@@ -1,3 +1,6 @@
+import logger from "../config/logger";
+
+
 export const getMyPayments = async (req, res) => {
   const { user } = req.user;
   try {
@@ -8,7 +11,7 @@ export const getMyPayments = async (req, res) => {
       });
     }
   } catch (error) {
-    console.log("Error in getting my payments", error);
+    logger.error("Error in getting my payments", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });

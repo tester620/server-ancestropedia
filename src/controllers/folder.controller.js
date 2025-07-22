@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { imagekit } from "../config/imagekit.js";
+import logger from "../config/logger.js";
 import Folder from "../models/folder.model.js";
 import Post from "../models/post.model.js";
 
@@ -27,7 +28,7 @@ export const createFolder = async (req, res) => {
       data: folder,
     });
   } catch (error) {
-    console.log("Error in creating folder", error);
+    logger.error("Error in creating folder", error);
     return res.status(500).json({
       messagfe: "Internal Server Erro",
     });
@@ -49,7 +50,7 @@ export const getMyFolders = async (req, res) => {
       adta: folders,
     });
   } catch (error) {
-    console.log("Error in fetching the folders", error);
+    logger.error("Error in fetching the folders", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });
@@ -97,7 +98,7 @@ export const updateFolder = async (req, res) => {
       data: folder,
     });
   } catch (error) {
-    console.log("Error in upadting the folder", error);
+    logger.error("Error in upadting the folder", error);
     return res.status(500).json({
       message: "Internal Sever Error",
     });
@@ -135,7 +136,7 @@ export const getFolderData = async (req, res) => {
       data: folder,
     });
   } catch (error) {
-    console.log("Error in getting the data of folder with id", error);
+    logger.error("Error in getting the data of folder with id", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });
@@ -172,7 +173,7 @@ export const removeFolder = async (req, res) => {
       message: "Folder delete request made successfully",
     });
   } catch (error) {
-    console.log("Error in removing the folder", error);
+    logger.error("Error in removing the folder", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });
@@ -364,7 +365,7 @@ export const createInFolder = async (req, res) => {
       data: newPost,
     });
   } catch (error) {
-    console.log("Error in creating post in folder", error);
+    logger.error("Error in creating post in folder", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });
@@ -394,7 +395,7 @@ export const deletePost = async (req, res) => {
       await imagekit.deleteFile(post.imageFileId)
     }
   } catch (error) {
-    console.log("Error in deleting the post", error);
+    logger.error("Error in deleting the post", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });

@@ -1,4 +1,5 @@
 import DnaModel from "../models/dna-order.model.js";
+import logger from "../config/logger.js";
 import TreeArtModel from "../models/treeart.model.js";
 
 export const placeDnaOrder = async (req, res) => {
@@ -7,7 +8,7 @@ export const placeDnaOrder = async (req, res) => {
   if (!validator.isPostalCode)
     try {
     } catch (error) {
-      console.log("Error in placing the order", error);
+      logger.error("Error in placing the order", error);
       return res.status(500).json({
         message: "Internal Server Error",
       });
@@ -38,7 +39,7 @@ export const getMyDNAOrders = async (req, res) => {
       });
     }
   } catch (error) {
-    console.log("Error in fetching my orders", error);
+    logger.error("Error in fetching my orders", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });
@@ -58,7 +59,7 @@ export const getMyTreeOrders = async (req, res) => {
       data: orders,
     });
   } catch (error) {
-    console.log("Error in fetching tree Orders", error);
+    logger.error("Error in fetching tree Orders", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });

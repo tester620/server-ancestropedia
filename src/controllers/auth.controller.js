@@ -1,6 +1,7 @@
 import User from "../models/user.model.js";
 import validator from "validator";
 import bcrypt from "bcryptjs";
+import logger from "../config/logger.js";
 import { generateToken } from "../utils/token.js";
 import {
   generateOtp,
@@ -66,7 +67,7 @@ export const signup = async (req, res) => {
       data: user,
     });
   } catch (error) {
-    console.log("Error while registering user", error);
+    logger.error("Error while registering user", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });
@@ -85,7 +86,7 @@ export const logout = (_, res) => {
       .status(200)
       .json({ status: "success", message: "Logged out successfully" });
   } catch (error) {
-    console.log("Error in logout controller", error);
+    logger.error("Error in logout controller", error);
     return res
       .status(500)
       .json({ status: "error", message: "Internal server error" });
@@ -140,7 +141,7 @@ export const login = async (req, res) => {
       data: user,
     });
   } catch (error) {
-    console.log("Error while logging in", error);
+    logger.error("Error while logging in", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });
@@ -177,7 +178,7 @@ export const resetPassToken = async (req, res) => {
       message: "Mail sent successfully",
     });
   } catch (error) {
-    console.log("Error in sending OTp for pass reset", error);
+    logger.error("Error in sending OTp for pass reset", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });
@@ -325,7 +326,7 @@ export const verifyMailToken = async (req, res) => {
       message: "Account verified successfully",
     });
   } catch (error) {
-    console.log("Error in verification of user mail", error);
+    logger.error("Error in verification of user mail", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });

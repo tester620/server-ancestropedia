@@ -56,5 +56,5 @@ app.use("/api/user/notification", protectRoute, notificationRoutes);
 app.listen(7777, async () => {
   await connectDb();
   await redis.connect();
-  console.log("Server is listening on port", 7777);
+  logger.info("Server is listening on port", 7777);
 });

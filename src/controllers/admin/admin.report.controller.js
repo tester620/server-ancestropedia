@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import Report from "../../models/report.model.js";
 import Notification from "../../models/notification.model.js";
 import User from "../../models/user.model.js";
+import logger from "../../config/logger.js";
 import { sendReportReviewMail } from "../../utils/helper.js";
 
 //add pagination.limit and offset
@@ -20,7 +21,7 @@ export const getAllReports = async (req, res) => {
       data: allReports,
     });
   } catch (error) {
-    console.log("Error in getting all the reports", error);
+    logger.error("Error in getting all the reports", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });
@@ -47,7 +48,7 @@ export const getSpecificReport = async (req, res) => {
       data: report,
     });
   } catch (error) {
-    console.log("Error in getting specific report", error);
+    logger.error("Error in getting specific report", error);
   }
 };
 
@@ -104,7 +105,7 @@ export const reviewReport = async (req, res) => {
       },
     });
   } catch (error) {
-    console.log("Error in revewing the report", error);
+    logger.error("Error in revewing the report", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });
@@ -127,7 +128,7 @@ export const getReportsToreview = async (req, res) => {
       data: reports,
     });
   } catch (error) {
-    console.log("Error in fetching pending reports", error);
+    logger.error("Error in fetching pending reports", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });

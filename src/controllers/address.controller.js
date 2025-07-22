@@ -1,6 +1,7 @@
 import validator from "validator";
 import Address from "../models/address.model.js";
 import mongoose from "mongoose";
+import logger from "../config/logger.js";
 
 export const addAddress = async (req, res) => {
   const {
@@ -100,7 +101,7 @@ export const addAddress = async (req, res) => {
       data: addressDoc,
     });
   } catch (error) {
-    console.log("Error in adding the address feild", error);
+    logger.error("Error in adding the address feild", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });
@@ -120,7 +121,7 @@ export const getMyAddresses = async (req, res) => {
       data: addresses,
     });
   } catch (error) {
-    console.log("Error in getting my addresses", error);
+    logger.error("Error in getting my addresses", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });
@@ -188,7 +189,7 @@ export const updateAddress = async (req, res) => {
       data: address,
     });
   } catch (error) {
-    console.log("Error in updating the address", error);
+    logger.error("Error in updating the address", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });
@@ -221,7 +222,7 @@ export const removeAddress = async (req, res) => {
       message: "Address has been removed",
     });
   } catch (error) {
-    console.log("Error in removing the address", error);
+    logger.error("Error in removing the address", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });

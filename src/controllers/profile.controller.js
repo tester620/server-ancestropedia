@@ -1,6 +1,7 @@
 import User from "../models/user.model.js";
 import validator from "validator";
 import bcrypt from "bcryptjs";
+import logger from "../config/logger.js";
 import { imagekit } from "../config/imagekit.js";
 
 export const updateName = async (req, res) => {
@@ -26,7 +27,7 @@ export const updateName = async (req, res) => {
       message: "Name updated successfully",
     });
   } catch (error) {
-    console.log("Error in updating name", error);
+    logger.error("Error in updating name", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });
@@ -67,7 +68,7 @@ export const updatePass = async (req, res) => {
       data: user,
     });
   } catch (error) {
-    console.log("Error while updating the password", error);
+    logger.error("Error while updating the password", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });
@@ -138,7 +139,7 @@ export const treeData = async (req, res) => {
   }
   try {
   } catch (error) {
-    console.log("Error in creating getTreeData", error);
+    logger.error("Error in creating getTreeData", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });

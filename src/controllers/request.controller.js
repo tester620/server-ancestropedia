@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import Request from "../models/request.model.js";
 import User from "../models/user.model.js";
+import logger from "../config/logger.js";
 
 export const sendRequest = async (req, res) => {
   const { type, userId } = req.body;
@@ -52,7 +53,7 @@ export const sendRequest = async (req, res) => {
       data: newRequest,
     });
   } catch (error) {
-    console.log("Error in sending the request", error);
+    logger.error("Error in sending the request", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });
@@ -76,7 +77,7 @@ export const getRequests = async (req, res) => {
       data: requests,
     });
   } catch (error) {
-    console.log("Error in getting my requests", error);
+    logger.error("Error in getting my requests", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });

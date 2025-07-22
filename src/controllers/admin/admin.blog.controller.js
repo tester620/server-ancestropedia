@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { imagekit } from "../../config/imagekit.js";
 import AdminBlog from "../../models/admin.blogs.model.js";
+import logger from "../../config/logger.js";
 
 export const createBlog = async (req, res) => {
   const { title, description, image } = req.body;
@@ -30,7 +31,6 @@ export const createBlog = async (req, res) => {
       });
       imageUrl = uploadRes.url;
       imageFileId = uploadRes.fileId;
-      console.log(uploadRes.fileId);
     }
 
     const newBlog = new AdminBlog({
@@ -42,13 +42,12 @@ export const createBlog = async (req, res) => {
       newBlog.imageFileId = imageFileId;
     }
     await newBlog.save();
-    console.log(newBlog.imageFileId);
     return res.status(201).json({
       message: "New blog created successfully",
       data: newBlog,
     });
   } catch (error) {
-    console.log("Error in creating blog post", error);
+    logger.error("Error in creating blog post", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });
@@ -63,9 +62,8 @@ export const editBlog = async (req, res) => {
       message: "Valid blog Id is required",
     });
   }
-  const valid = !newTitle && !newDescription && !newImage;
-  console.log(valid);
-  if (valid) {
+
+  if (!newTitle && !newDescription && !newImage) {
     return res.status(400).json({
       message: "Atleast one feild is required",
     });
@@ -95,7 +93,7 @@ export const editBlog = async (req, res) => {
       data: blog,
     });
   } catch (error) {
-    console.log("Error in updating blogs", error);
+    logger.error("Error in updating blogs", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });
@@ -119,7 +117,7 @@ export const removeBlog = async (req, res) => {
       message: "Blog post has been deleted",
     });
   } catch (error) {
-    console.log("Error in removing the blog", error);
+    logger.error("Error in removing the blog", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });
@@ -140,7 +138,7 @@ export const getMyBlogs = async (req, res) => {
       data: blogs,
     });
   } catch (error) {
-    console.log("Error in getting my blogs", error);
+    logger.error("Error in getting my blogs", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });
@@ -168,7 +166,7 @@ export const getSpecificBlog = async (req, res) => {
       data: blog,
     });
   } catch (error) {
-    console.log("Error in getting specific blog", error);
+    logger.error("Error in getting specific blog", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });

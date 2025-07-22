@@ -1,4 +1,5 @@
 import SupportMessage from "../models/support.model.js";
+import logger from "../config/logger.js";
 import validator from "validator";
 export const submitMessage = async (req, res) => {
   const { email, name, message } = req.body;
@@ -35,7 +36,7 @@ export const submitMessage = async (req, res) => {
       data: newMessage,
     });
   } catch (error) {
-    console.log("Error in submiiting the support message", error);
+    logger.error("Error in submiiting the support message", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });

@@ -3,6 +3,8 @@ import { FamilyTree } from "../../models/ne04j-models/tree.model.js";
 import { Person } from "../../models/ne04j-models/person.model.js";
 import { neogma } from "../../config/neo4j.js";
 import { redis } from "../../config/redis.js";
+import logger from "../../config/logger.js";
+
 
 export const createTree = async (req, res) => {
   try {
@@ -216,7 +218,7 @@ export const getMyTree = async (req, res) => {
       data: tree,
     });
   } catch (error) {
-    console.log("Error in getting my tree", error);
+    logger.error("Error in getting my tree", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });
@@ -249,7 +251,7 @@ export const changeTreeName = async (req, res) => {
       data: tree,
     });
   } catch (error) {
-    console.log("Error in updating the name of tree", error);
+    logger.error("Error in updating the name of tree", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });
@@ -304,7 +306,7 @@ export const getMyCompleteTree = async (req, res) => {
       data: responseData,
     });
   } catch (error) {
-    console.log("Error in getting the complete tree", error);
+    logger.error("Error in getting the complete tree", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });

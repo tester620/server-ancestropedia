@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import Notification from "../models/notification.model.js";
 import dotenv from "dotenv";
+import logger from "../config/logger.js";
 
 dotenv.config();
 
@@ -32,7 +33,7 @@ export const getNotifications = async (req, res) => {
       totalNotifications: total,
     });
   } catch (error) {
-    console.log("Error in getting notifications", error);
+    logger.error("Error in getting notifications", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });
@@ -66,7 +67,7 @@ export const markAsRead = async (req, res) => {
       data: notification,
     });
   } catch (error) {
-    console.log("Error in marking notification as read", error);
+    logger.error("Error in marking notification as read", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });
@@ -90,7 +91,7 @@ export const markAllAsRead = async (req, res) => {
       message: "Notification marked as read ",
     });
   } catch (error) {
-    console.log("Error in upadting all the notification as read", error);
+    logger.error("Error in upadting all the notification as read", error);
     return res.status(500).json({
       message: "internal Server Error",
     });
@@ -122,7 +123,7 @@ export const createNotification = async (req, res) => {
       data: newNotification,
     });
   } catch (error) {
-    console.log("Error in creating new notification", error);
+    logger.error("Error in creating new notification", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });

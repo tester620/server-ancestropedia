@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import Report from "../models/report.model.js";
 import { imagekit } from "../config/imagekit.js";
+import logger from "../config/logger.js";
 
 export const getMyReports = async (req, res) => {
   const user = req.user;
@@ -17,7 +18,7 @@ export const getMyReports = async (req, res) => {
       data: reports,
     });
   } catch (error) {
-    console.log("Error in fetching my reports", error);
+    logger.error("Error in fetching my reports", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });
@@ -53,7 +54,7 @@ export const submitReport = async (req, res) => {
       data: report,
     });
   } catch (error) {
-    console.log("Error in submitting report", error);
+    logger.error("Error in submitting report", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });
@@ -92,7 +93,7 @@ export const abortReport = async (req, res) => {
       message: "Report Aborted successfully",
     });
   } catch (error) {
-    console.log("Error in aborting report", error);
+    logger.error("Error in aborting report", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });

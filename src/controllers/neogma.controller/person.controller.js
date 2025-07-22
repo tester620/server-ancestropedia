@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 import { Person } from "../../models/ne04j-models/person.model.js";
 import { FamilyTree } from "../../models/ne04j-models/tree.model.js";
+import logger from "../../config/logger.js";
 
 export const createPerson = async (req, res) => {
   const { data } = req.body;
@@ -108,7 +109,7 @@ export const createOwner = async (req, res) => {
       data: person,
     });
   } catch (error) {
-    console.log("Error in creating owner", error);
+    logger.error("Error in creating owner", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });
@@ -198,8 +199,6 @@ export const treeMergeController = async (req, res) => {
         break;
       }
     }
-
-    console.log(foundPerson);
     if (foundPerson && foundPerson.treeId) {
       const existingTree = await FamilyTree.findOne({
         where: { id: foundPerson.treeId },
@@ -251,7 +250,7 @@ export const getPersonById = async (req, res) => {
       data: person,
     });
   } catch (error) {
-    console.log("Error in getting person details", error);
+    logger.error("Error in getting person details", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });

@@ -1,6 +1,7 @@
 import mongoose  from "mongoose";
 import { imagekit } from "../config/imagekit.js";
 import Post from "../models/post.model.js";
+import logger from "../config/logger.js";
 
 export const postStory = async (req, res) => {
   const { image, videoUrl, description } = req.body;
@@ -26,7 +27,7 @@ export const postStory = async (req, res) => {
       .status(201)
       .json({ message: "Post submitted successfully", data: newPost });
   } catch (error) {
-    console.log("Error in uploading post", error);
+    logger.error("Error in uploading post", error);
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
@@ -59,7 +60,7 @@ export const editPost = async (req, res) => {
       data: post,
     });
   } catch (error) {
-    console.log("Error in updating post", error);
+    logger.error("Error in updating post", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });
@@ -80,7 +81,7 @@ export const getMyPosts = async (req, res) => {
       data: posts,
     });
   } catch (error) {
-    console.log("Error in getting my posts");
+    logger.error("Error in getting my posts");
     return res.status(500).json({
       message: "Internal Server Error",
     });
@@ -113,7 +114,7 @@ export const deletePost = async (req, res) => {
       message: "Delete request have been made",
     });
   } catch (error) {
-    console.log("Error in deleting the post", error);
+    logger.error("Error in deleting the post", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });
@@ -127,7 +128,7 @@ export const getFamilyRelatedFeed = async (req, res) => {
       message: "Not Enough data to provide feed",
     });
   } catch (error) {
-    console.log("Error in getting familyRelatedFeed", error);
+    logger.error("Error in getting familyRelatedFeed", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });
