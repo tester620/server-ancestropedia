@@ -12,10 +12,9 @@ const transporter = nodemailer.createTransport({
 });
 
 export const generateOtp = () => {
-  const otp = Math.floor(100000 + Math.random() * 900000); 
+  const otp = Math.floor(100000 + Math.random() * 900000);
   return otp;
 };
-
 
 export const sendPassMail = async (otp, user) => {
   const mailOptions = {
@@ -128,4 +127,42 @@ export const sendVerificationMail = async (user) => {
 
   await transporter.sendMail(mailOptions);
   return otp;
+};
+
+export const sendReportReviewMail = async (report, user) => {
+  const mailOptions = {
+    from: `"Ancestropedia Team" <${process.env.EMAIL}>`,
+    to: user.email,
+    subject: "Ancestropedia Report Review Update",
+    html: `
+      <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <img 
+            src="https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=294,fit=crop,q=95/mjE7lpywOyIq5zKx/ancestropedia-1-mePx4pQ230uGow26.png" 
+            alt="Ancestropedia Logo" 
+            style="width: 100px; height: 100px; object-fit: cover; border-radius: 50%;" 
+          />
+        </div>
+        <h2 style="text-align: center; color: #007BFF;">Report Status Update</h2>
+        <p>Hello ${user.firstName || "User"},</p>
+        <p>Your submitted report has been reviewed. Here are the details:</p>
+        <div style="margin: 24px 0; background: #f4f8fc; padding: 18px; border-radius: 8px;">
+          <p><strong>Report ID:</strong> ${report._id}</p>
+          <p><strong>Description:</strong> ${report.description}</p>
+          <p><strong>Status:</strong> <span style="color: #007BFF; font-weight: bold;">${
+            report.status
+          }</span></p>
+        </div>
+        <p>If you have questions or need further assistance, feel free to reply to this email.</p>
+        <p>Kind regards,</p>
+        <p><strong>The Ancestropedia Team</strong></p>
+        <hr style="margin-top: 30px;" />
+        <p style="font-size: 12px; color: #999; text-align: center;">
+          Need help? <a href="mailto:vermadheeraj945@gmail.com" style="color: #007BFF;">Contact us</a>
+        </p>
+      </div>
+    `,
+  };
+
+  await transporter.sendMail(mailOptions);
 };

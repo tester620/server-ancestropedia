@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import Report from "../../models/report.model.js";
 import Notification from "../../models/notification.model.js";
+import User from "../../models/user.model.js";
+import { sendReportReviewMail } from "../../utils/helper.js";
 
 //add pagination.limit and offset
 export const getAllReports = async (req, res) => {
@@ -67,7 +69,20 @@ export const reviewReport = async (req, res) => {
         message: "Report not found",
       });
     }
-    //update the url after the frontend routnig completion
+    if (report.status !== "pending") {
+      return res.status(400).json({
+        message: "Report cannot be reviewed. Status is not pending",
+      });
+    }
+
+    const user = await User.findById(report.fromId);
+    if (!user) {
+      return res.status(400).json({
+        message:
+          "User has been deleted or removed their account from the platform",
+      });
+    }
+    //update the url after the frontend routing completion
     const newNotifiaction = await Notification({
       about,
       toUser: report.fromId.toString(),
@@ -78,6 +93,7 @@ export const reviewReport = async (req, res) => {
     await newNotifiaction.save();
     report.status = "resolved";
     await report.save();
+    await sendReportReviewMail(report, user);
     return res.status(200).json({
       message: "Report reviwed successsfully",
       data: {
