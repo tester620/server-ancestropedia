@@ -22,6 +22,7 @@ import {
   adminRoutes,
   addressRoutes,
 } from "./routes/routes.js";
+import logger from "./config/logger.js";
 
 dotenv.config();
 const app = express();
