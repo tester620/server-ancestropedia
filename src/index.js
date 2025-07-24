@@ -17,7 +17,6 @@ import {
   requestRoutes,
   treeRoutes,
   userRoutes,
-  personRoutes,
   supportRoutes,
   adminRoutes,
   addressRoutes,
@@ -48,7 +47,6 @@ app.use("/api/profile", protectRoute, profileRoutes);
 app.use("/api/user", protectRoute, userRoutes);
 app.use("/api/user/address", protectRoute, addressRoutes);
 app.use("/api/user/tree", protectRoute, treeRoutes);
-app.use("/api/user/tree/person", protectRoute, personRoutes);
 app.use("/api/user/order", protectRoute, orderRoutes);
 app.use("/api/user/folder", protectRoute, folderRoutes);
 app.use("/api/user/request", protectRoute, requestRoutes);
