@@ -188,7 +188,6 @@ src/
 | Method | Endpoint   | Description           |
 | ------ | ---------- | --------------------- |
 | GET    | `/ping`    | Health check          |
-| GET    | `/imeuswe` | Misc/diagnostic check |
 
 ---
 
