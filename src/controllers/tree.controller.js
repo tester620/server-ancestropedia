@@ -46,6 +46,7 @@ export const createAndAddPerson = async (req, res) => {
   const {
     firstName,
     lastName,
+    profession,
     dob,
     dod,
     gender,
@@ -67,6 +68,11 @@ export const createAndAddPerson = async (req, res) => {
     });
   }
 
+  if (!profession) {
+    return res.status(400).json({
+      message: "Profession is requried",
+    });
+  }
   if (!["father", "mother", "spouse"].includes(relatedType)) {
     return res.status(400).json({ message: "Invalid relation type" });
   }
@@ -86,7 +92,6 @@ export const createAndAddPerson = async (req, res) => {
   }
 
   try {
-    // Check tree existence and ownership
     const tree = await Tree.findById(treeId);
     if (!tree) {
       return res.status(404).json({ message: "Tree not found" });
@@ -102,6 +107,7 @@ export const createAndAddPerson = async (req, res) => {
     const newPerson = new Person({
       firstName: firstName.trim(),
       lastName: lastName.trim(),
+      profession,
       dob,
       dod: living ? null : dod,
       gender,
@@ -142,62 +148,83 @@ export const createAndAddPerson = async (req, res) => {
   }
 };
 
-//update the relations and remove the exisitng relations but before that check the dependency
 export const removePerson = async (req, res) => {
-  const { personId, treeId } = req.body;
+  const { personId, treeId, force = false } = req.body;
 
-  // Validate inputs
   if (!personId || !treeId) {
-    return res.status(400).json({
-      message: "Person ID and Tree ID are required",
-    });
+    return res
+      .status(400)
+      .json({ message: "Person ID and Tree ID are required" });
   }
 
   if (
     !mongoose.Types.ObjectId.isValid(personId) ||
     !mongoose.Types.ObjectId.isValid(treeId)
   ) {
-    return res.status(400).json({
-      message: "Invalid IDs provided",
-    });
+    return res.status(400).json({ message: "Invalid IDs provided" });
   }
 
   try {
-    // Find and validate person
     const person = await Person.findById(personId);
-    if (!person) {
-      return res.status(404).json({ message: "Person not found" });
-    }
+    if (!person) return res.status(404).json({ message: "Person not found" });
 
-    // Find and validate tree
     const tree = await Tree.findById(treeId);
-    if (!tree) {
-      return res.status(404).json({ message: "Tree not found" });
-    }
+    if (!tree) return res.status(404).json({ message: "Tree not found" });
 
-    // Check person membership
     if (!tree.members.includes(personId)) {
-      return res.status(400).json({
-        message: "Person not in specified tree",
-      });
+      return res.status(400).json({ message: "Person not in specified tree" });
     }
 
-    // Remove person from tree
-    tree.members = tree.members.filter((id) => id.toString() !== personId);
-    await tree.save();
-
-    // Remove person's relationships
-    await Relation.deleteMany({
-      $or: [{ to: personId }, { from: personId }],
+    // Fetch all relationships involving this person
+    const relationships = await Relation.find({
+      $or: [{ from: personId }, { to: personId }],
       treeId,
     });
 
-    // Delete person (or mark as inactive)
+    if (relationships.length > 0 && !force) {
+      // Warn user with relationship details before deleting
+      return res.status(400).json({
+        message:
+          "Person has existing relationships. Confirm deletion with 'force: true'.",
+        relationships: relationships.map((rel) => ({
+          id: rel._id,
+          from: rel.from,
+          to: rel.to,
+          type: rel.relationType,
+        })),
+      });
+    }
+
+    // Optional: Detect circular relationships (basic check)
+    const involvedInCycle = await Relation.exists({
+      from: personId,
+      to: personId,
+      treeId,
+    });
+
+    if (involvedInCycle && !force) {
+      return res.status(400).json({
+        message:
+          "Circular relationship detected. Deletion aborted. Use 'force: true' to proceed.",
+      });
+    }
+
+    // Remove person from tree members
+    tree.members = tree.members.filter((id) => id.toString() !== personId);
+    await tree.save();
+
+    // Delete all relationships
+    await Relation.deleteMany({
+      $or: [{ from: personId }, { to: personId }],
+      treeId,
+    });
+
+    // Delete person
     await Person.findByIdAndDelete(personId);
 
-    return res.status(200).json({
-      message: "Person removed successfully",
-    });
+    return res
+      .status(200)
+      .json({ message: "Person and relationships removed successfully." });
   } catch (error) {
     logger.error("Error removing person", error);
     return res.status(500).json({ message: "Internal Server Error" });
@@ -355,7 +382,7 @@ export const getFullTree = async (req, res) => {
     if (!tree) {
       return res.status(404).json({ message: "Tree not found" });
     }
-    const relations = await Relation.find({treeId})
+    const relations = await Relation.find({ treeId });
 
     const treeData = {
       ...tree.toObject(),

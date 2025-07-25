@@ -20,6 +20,7 @@ import {
   supportRoutes,
   adminRoutes,
   addressRoutes,
+  eventRoutes,
 } from "./routes/routes.js";
 import logger from "./config/logger.js";
 
@@ -51,6 +52,7 @@ app.use("/api/user/order", protectRoute, orderRoutes);
 app.use("/api/user/folder", protectRoute, folderRoutes);
 app.use("/api/user/request", protectRoute, requestRoutes);
 app.use("/api/user/notification", protectRoute, notificationRoutes);
+app.use("/api/user/event", protectRoute, eventRoutes);
 
 app.listen(7777, async () => {
   await connectDb();

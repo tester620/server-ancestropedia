@@ -11,7 +11,7 @@ const modelSchema = mongoose.Schema(
       ref: "User",
     },
     marriageDate: {
-      type: String,
+      type: Date,
       required: true,
     },
   },

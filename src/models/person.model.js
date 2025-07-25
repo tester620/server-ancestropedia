@@ -19,11 +19,11 @@ const schemaModel = mongoose.Schema(
       required: true,
     },
     dob: {
-      type: String,
+      type: Date,
       required: true,
     },
     dod: {
-      type: String,
+      type: Date,
     },
     gender: {
       type: String,
