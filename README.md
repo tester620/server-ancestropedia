@@ -1,14 +1,5 @@
 # AncestroPedia - Backend Server
 
-![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge\&logo=nodedotjs\&logoColor=white)
-![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge\&logo=express\&logoColor=white)
-![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge\&logo=mongodb\&logoColor=white)
-![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge\&logo=redis\&logoColor=white)
-![Passport.js](https://img.shields.io/badge/Passport-34E27A?style=for-the-badge\&logo=passport\&logoColor=white)
-![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge\&logo=JSON%20web%20tokens\&logoColor=white)
-![Razorpay](https://img.shields.io/badge/Razorpay-02042B?style=for-the-badge\&logo=razorpay\&logoColor=00C3FF)
-![Cloudinary](https://img.shields.io/badge/Cloudinary-3448C5?style=for-the-badge\&logo=cloudinary\&logoColor=white)
-
 This is the backend server for **AncestroPedia**, a Family Tree Application. Built using **Node.js**, **Express**, **MongoDB**, and **Redis**, the backend handles user authentication, family tree management, order tracking, notifications, reports, and more.
 
 ---
@@ -81,21 +72,113 @@ src/
 
 ---
 
-## 🛍️ API Endpoints Overview
+## 🛍️ API Reference
 
-| Method | Endpoint                 | Description                  |
-| ------ | ------------------------ | ---------------------------- |
-| GET    | `/api/ping`              | Health check                 |
-| POST   | `/api/auth/*`            | Auth-related endpoints       |
-| GET    | `/api/user/tree`         | Fetch family tree            |
-| POST   | `/api/user/tree`         | Create or update tree        |
-| GET    | `/api/user/order`        | Order history                |
-| POST   | `/api/user/request`      | Request to add family member |
-| POST   | `/api/report`            | Report user or issue         |
-| POST   | `/api/support`           | Submit support message       |
-| GET    | `/api/user/notification` | Fetch user notifications     |
-| POST   | `/api/user/address`      | Add or update address        |
-| \*     | `/api/admin/*`           | Admin operations             |
+### 👤 Auth APIs
+
+| Method | Endpoint                | Description               |
+| ------ | ----------------------- | ------------------------- |
+| POST   | `/auth/register`        | Register a new user       |
+| POST   | `/auth/login`           | Login user                |
+| POST   | `/auth/logout`          | Logout user               |
+| POST   | `/auth/verifyMailToken` | Verify email token        |
+| POST   | `/auth/mail/reset-pass` | Send password reset email |
+| POST   | `/auth/reset-pass`      | Reset password            |
+| POST   | `/auth/verifyPassToken` | Verify password token     |
+| PUT    | `/auth/update-pass`     | Update user password      |
+| GET    | `/auth/google`          | Google OAuth login        |
+
+### 📬 User Interaction
+
+| Method | Endpoint   | Description                |
+| ------ | ---------- | -------------------------- |
+| POST   | `/submit`  | Submit support or feedback |
+| GET    | `/feed`    | Fetch general feed         |
+| GET    | `/reports` | Fetch general reports      |
+| PUT    | `/abort`   | Abort an active operation  |
+
+### 📝 Post Management
+
+| Method | Endpoint      | Description        |
+| ------ | ------------- | ------------------ |
+| GET    | `/myPosts`    | Get user's posts   |
+| POST   | `/create`     | Create a new post  |
+| PUT    | `/edit/:id`   | Edit a post        |
+| DELETE | `/delete/:id` | Delete a post      |
+| POST   | `/bulk`       | Bulk create posts  |
+| POST   | `/addPosts`   | Add multiple posts |
+
+### 🌳 Family Tree APIs
+
+| Method | Endpoint         | Description                    |
+| ------ | ---------------- | ------------------------------ |
+| GET    | `/getMyData`     | Get user profile + tree data   |
+| GET    | `/myTreeOrders`  | View family tree order history |
+| GET    | `/myDnaOrders`   | View DNA test orders           |
+| GET    | `/getRequests`   | Get incoming tree requests     |
+| POST   | `/sendRequest`   | Send a family link request     |
+| GET    | `/myTree`        | Get user’s family tree         |
+| POST   | `/create`        | Create a new tree              |
+| PUT    | `/update`        | Update tree info               |
+| DELETE | `/create/owner`  | Delete tree owner              |
+| PUT    | `/person/create` | Create/edit person node        |
+| POST   | `/addMember`     | Add new member to tree         |
+
+### 📁 Folder & File APIs
+
+| Method | Endpoint          | Description                 |
+| ------ | ----------------- | --------------------------- |
+| POST   | `/createInFolder` | Create data inside a folder |
+| GET    | `/data?folderId`  | Get folder data by ID       |
+| GET    | `/myFolders`      | Get all user folders        |
+| PUT    | `/updateFolder`   | Update folder metadata      |
+| DELETE | `/remove`         | Delete folder or file       |
+| PATCH  | `/remove?postIds` | Delete multiple posts       |
+
+### 📨 Notifications & Messages
+
+| Method | Endpoint          | Description                |
+| ------ | ----------------- | -------------------------- |
+| GET    | `/fetch`          | Fetch latest notifications |
+| PUT    | `/markRead`       | Mark one notification read |
+| PUT    | `/markAllRead`    | Mark all as read           |
+| GET    | `/message`        | Get latest message         |
+| GET    | `/getAllMessages` | Get all messages           |
+
+### 🧾 Address Book
+
+| Method | Endpoint       | Description         |
+| ------ | -------------- | ------------------- |
+| POST   | `/add`         | Add address         |
+| GET    | `/myAddresses` | Get saved addresses |
+| PUT    | `/update`      | Update address      |
+| DELETE | `/remove`      | Delete address      |
+
+### 🧠 Reports
+
+| Method | Endpoint          | Description          |
+| ------ | ----------------- | -------------------- |
+| GET    | `/allReports`     | Get all reports      |
+| GET    | `/specificReport` | Get report by ID     |
+| GET    | `/pending`        | Get pending reports  |
+| POST   | `/reviewReport`   | Submit report review |
+
+### 📰 Blog APIs
+
+| Method | Endpoint        | Description       |
+| ------ | --------------- | ----------------- |
+| POST   | `/createBlog`   | Create a blog     |
+| PUT    | `/update`       | Update blog       |
+| GET    | `/myBlogs`      | Get user blogs    |
+| GET    | `/specificBlog` | Get specific blog |
+| DELETE | `/remove`       | Delete a blog     |
+
+### 🔧 Utility APIs
+
+| Method | Endpoint   | Description           |
+| ------ | ---------- | --------------------- |
+| GET    | `/ping`    | Health check          |
+| GET    | `/imeuswe` | Misc/diagnostic check |
 
 ---
 
@@ -185,7 +268,7 @@ It sets up Node, Redis, and optionally MongoDB (if configured).
 
 ## 🧠 Author
 
-Made with ❤️ by **[Ancestropedia Team](http://ancestropedia.online/)**
+Made with ❤️ by [**Ancestropedia Team**](https://ancestropedia.online)
 
 ---
 
