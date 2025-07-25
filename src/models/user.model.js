@@ -6,13 +6,13 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    googleAuth:{
-      type:Boolean,
-      default:false
+    googleAuth: {
+      type: Boolean,
+      default: false,
     },
-    verified:{
-      type:Boolean,
-      default:false,
+    verified: {
+      type: Boolean,
+      default: false,
     },
     upadtesLeft: {
       type: Number,
@@ -56,7 +56,10 @@ const userSchema = new mongoose.Schema(
     childrenName: {
       type: [String],
     },
-    viewsLeft: {
+    treeId: {
+      type: mongoose.Schema.Types.ObjectId,
+    },
+    tokens: {
       type: Number,
       default: 20,
     },

@@ -14,6 +14,10 @@ const schemaModel = mongoose.Schema(
       type: String,
       required: true,
     },
+    profession: {
+      type: String,
+      required: true,
+    },
     dob: {
       type: String,
       required: true,

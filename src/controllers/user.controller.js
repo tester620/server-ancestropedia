@@ -121,16 +121,39 @@ export const deletePost = async (req, res) => {
   }
 };
 
-export const getFamilyRelatedFeed = async (req, res) => {
-  //
+export const bulkDeletePost = async (req, res) => {
+  const { postIds } = req.body;
+  if (!Array.isArray(postIds) || postIds.length === 0) {
+    return res.status(400).json({ message: "Post ids are required" });
+  }
+
+  const invalid = postIds.some((id) => !mongoose.isValidObjectId(id));
+  if (invalid) {
+    return res.status(400).json({ message: "All post ids must be valid" });
+  }
+
   try {
-    return res.status(200).json({
-      message: "Not Enough data to provide feed",
-    });
+    const posts = await Post.find({ _id: { $in: postIds } });
+    const unAuthorised = posts.some(
+      (post) => post.userId.toString() !== req.user._id.toString()
+    );
+
+    if (unAuthorised) {
+      return res.status(401).json({
+        message: "Cannot remove someone else's posts",
+      });
+    }
+    const imageFileIds = posts.map((post) => post.imageFileId).filter(Boolean);
+
+    if (imageFileIds.length) {
+      await imagekit.bulkDeleteFiles(imageFileIds);
+    }
+
+    await Post.deleteMany({ _id: { $in: postIds } });
+
+    res.status(200).json({ message: "Posts deleted successfully" });
   } catch (error) {
-    logger.error("Error in getting familyRelatedFeed", error);
-    return res.status(500).json({
-      message: "Internal Server Error",
-    });
+    logger.error("Error in bulk deletion of posts", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };

@@ -168,6 +168,11 @@ export const removeFolder = async (req, res) => {
         message: "Unauthorized- Can't remove other's folder",
       });
     }
+    if (folder.posts.length) {
+      return res.status(400).json({
+        message: "Folder is not empty. Can't delete it",
+      });
+    }
     await Folder.findByIdAndDelete(folderId);
     return res.status(202).json({
       message: "Folder delete request made successfully",
@@ -391,8 +396,8 @@ export const deletePost = async (req, res) => {
         message: "Unauthorized- Can't delete someone's posts",
       });
     }
-    if(post.imageUrl){
-      await imagekit.deleteFile(post.imageFileId)
+    if (post.imageUrl) {
+      await imagekit.deleteFile(post.imageFileId);
     }
   } catch (error) {
     logger.error("Error in deleting the post", error);
@@ -401,3 +406,5 @@ export const deletePost = async (req, res) => {
     });
   }
 };
+
+

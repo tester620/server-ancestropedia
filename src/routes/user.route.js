@@ -1,8 +1,8 @@
 import express from "express";
 import {
+  bulkDeletePost,
   deletePost,
   editPost,
-  getFamilyRelatedFeed,
   getMyPosts,
   postStory,
 } from "../controllers/user.controller.js";
@@ -13,6 +13,6 @@ router.get("/post/myPosts", getMyPosts);
 router.post("/post/create", postStory);
 router.put("/post/edit/:id", editPost);
 router.delete("/post/delete/:id", deletePost);
-router.get("/feed", getFamilyRelatedFeed);
+router.post("/post/remove/bulk", bulkDeletePost);
 
 export default router;

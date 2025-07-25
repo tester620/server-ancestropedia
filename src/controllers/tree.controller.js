@@ -142,6 +142,7 @@ export const createAndAddPerson = async (req, res) => {
   }
 };
 
+//update the relations and remove the exisitng relations but before that check the dependency
 export const removePerson = async (req, res) => {
   const { personId, treeId } = req.body;
 
@@ -354,11 +355,7 @@ export const getFullTree = async (req, res) => {
     if (!tree) {
       return res.status(404).json({ message: "Tree not found" });
     }
-
-    const memberIds = tree.members.map((m) => m._id);
-    const relations = await Relation.find({
-      $or: [{ from: { $in: memberIds } }, { to: { $in: memberIds } }],
-    }).populate("from to", "id firstName lastName");
+    const relations = await Relation.find({treeId})
 
     const treeData = {
       ...tree.toObject(),
