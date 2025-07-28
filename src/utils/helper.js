@@ -184,7 +184,7 @@ export const sendTokenAllotmentMail = async (user, redirectUrl) => {
         </div>
         <h2 style="text-align: center; color: #28a745;">Token Allotted</h2>
         <p>Hello ${user.firstName || "User"},</p>
-        <p>You have been successfully allotted a token to access and contribute to a family tree.</p>
+        <p>You have been successfully allotted  token to access and contribute to a family tree.</p>
         <p>To view and start editing, please click the link below:</p>
         <div style="margin: 20px 0;">
           <a href="${redirectUrl}" style="background-color: #28a745; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 6px;">Access Tree</a>

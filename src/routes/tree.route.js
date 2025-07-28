@@ -2,9 +2,12 @@ import express from "express";
 import {
   createAndAddPerson,
   createEmptyTree,
+  createTreeWithFamily,
   editPerson,
   editTreeDetails,
+  getAllRecomendedTrees,
   getFullTree,
+  getFullTreeUser,
   removePerson,
 } from "../controllers/tree.controller.js";
 
@@ -16,5 +19,8 @@ router.put("/update/person", editPerson);
 router.post("/createAndAddPerson", createAndAddPerson);
 router.delete("/remove/person", removePerson);
 router.get("/getFullTree", getFullTree);
+router.post("/createTreeWithFamily", createTreeWithFamily);
+router.get("/getFullTreeUser", getFullTreeUser);
+router.post("/recomended", getAllRecomendedTrees);
 
 export default router;

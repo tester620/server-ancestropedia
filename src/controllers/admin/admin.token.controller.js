@@ -7,6 +7,11 @@ import {
   sendTokenRejectionMail,
   sendTokenRemovalMail,
 } from "../../utils/helper.js";
+import {
+  tokenAllotmentNotification,
+  tokenRejectionNotification,
+  tokenRemovalNotification,
+} from "../../utils/notification.helper.js";
 
 const redirectUrl = process.env.FRONTEND_URL;
 
@@ -29,8 +34,6 @@ export const getPendingTokenRequests = async (req, res) => {
     });
   }
 };
-
-//Also create a new notification for the user when rejecting the token request
 export const rejectTokenRequest = async (req, res) => {
   const { comment, tokenId } = req.body;
   if (!tokenId || !mongoose.isValidObjectId(tokenId)) {
@@ -69,6 +72,7 @@ export const rejectTokenRequest = async (req, res) => {
     tokenRequest.status = "rejected";
     tokenRequest.comment = comment;
     await tokenRequest.save();
+    await tokenRejectionNotification(tokenRequest.amount, user);
     await sendTokenRejectionMail(user, redirectUrl);
 
     return res.status(200).json({
@@ -83,7 +87,6 @@ export const rejectTokenRequest = async (req, res) => {
   }
 };
 
-//Also create a new notification for the user when alloting the token request
 export const allotToken = async (req, res) => {
   const { tokenId, comment } = req.body;
   if (!comment || !comment.length) {
@@ -119,6 +122,8 @@ export const allotToken = async (req, res) => {
     user.tokens = tokenRequest.amount;
     await user.save();
     await tokenRequest.save();
+    await tokenAllotmentNotification(tokenRequest.amount, user);
+
     await sendTokenAllotmentMail(user, redirectUrl);
     return res.status(200).json({
       message: "Token alotted successfully",
@@ -132,9 +137,8 @@ export const allotToken = async (req, res) => {
   }
 };
 
-//Also create a new notification for the user when removing the tokens
 export const removeToken = async (req, res) => {
-  const { tokenId, comment, amount } = req.body;
+  const { userId, comment, amount } = req.body;
   if (!comment || !comment.length) {
     return res.status(400).json({
       message: "Comment is required",
@@ -150,28 +154,24 @@ export const removeToken = async (req, res) => {
       message: "Comment length should be betweeen 5 and 100 characters",
     });
   }
-  if (!tokenId || !mongoose.isValidObjectId(tokenId)) {
+  if (!userId || !mongoose.isValidObjectId(userId)) {
     return res.status(400).json({
       message: "Valid token request is required",
     });
   }
 
   try {
-    const tokenRequest = await TokenRequest.findById(tokenId);
-    if (!tokenRequest) {
-      return res.status(404).json({
-        message: "No token found with given id",
-      });
-    }
-    const user = await User.findById(tokenRequest.userId);
+    const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({
-        message: "User not found",
+        message: "No user found with given id",
       });
     }
-    user.tokens = amount;
+    user.tokens = user.tokens - amount < 0 ? 0 : user.tokens - amount;
     await user.save();
     await sendTokenRemovalMail(user, redirectUrl);
+    await tokenRemovalNotification(amount, user);
+
     return res.status(200).json({
       message: "User token removed successfully",
     });
