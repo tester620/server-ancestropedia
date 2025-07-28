@@ -169,17 +169,106 @@ export const sendReportReviewMail = async (report, user) => {
 };
 
 export const sendTokenAllotmentMail = async (user, redirectUrl) => {
-  const mailOptions = {};
+  const mailOptions = {
+    from: `"Ancestropedia Team" <${process.env.EMAIL}>`,
+    to: user.email,
+    subject: "You Have Been Allotted Tree Access Token",
+    html: `
+      <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <img 
+            src="https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=294,fit=crop,q=95/mjE7lpywOyIq5zKx/ancestropedia-1-mePx4pQ230uGow26.png" 
+            alt="Ancestropedia Logo" 
+            style="width: 100px; height: 100px; object-fit: cover; border-radius: 50%;" 
+          />
+        </div>
+        <h2 style="text-align: center; color: #28a745;">Token Allotted</h2>
+        <p>Hello ${user.firstName || "User"},</p>
+        <p>You have been successfully allotted a token to access and contribute to a family tree.</p>
+        <p>To view and start editing, please click the link below:</p>
+        <div style="margin: 20px 0;">
+          <a href="${redirectUrl}" style="background-color: #28a745; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 6px;">Access Tree</a>
+        </div>
+        <p>Regards,</p>
+        <p><strong>The Ancestropedia Team</strong></p>
+        <hr style="margin-top: 30px;" />
+        <p style="font-size: 12px; color: #999; text-align: center;">
+          Need help? <a href="mailto:vermadheeraj945@gmail.com" style="color: #007BFF;">Contact us</a>
+        </p>
+      </div>
+    `,
+  };
+
   await transporter.sendMail(mailOptions);
 };
 
 export const sendTokenRemovalMail = async (user, redirectUrl) => {
-  const mailOptions = {};
+  const mailOptions = {
+    from: `"Ancestropedia Team" <${process.env.EMAIL}>`,
+    to: user.email,
+    subject: "Tree Access Token Removed",
+    html: `
+      <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <img 
+            src="https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=294,fit=crop,q=95/mjE7lpywOyIq5zKx/ancestropedia-1-mePx4pQ230uGow26.png" 
+            alt="Ancestropedia Logo" 
+            style="width: 100px; height: 100px; object-fit: cover; border-radius: 50%;" 
+          />
+        </div>
+        <h2 style="text-align: center; color: #dc3545;">Token Access Removed</h2>
+        <p>Hello ${user.firstName || "User"},</p>
+        <p>We wanted to let you know that your access to the tree has been revoked.</p>
+        <p>If this was unexpected or you believe it’s a mistake, you can contact us.</p>
+        <p>To check, please click the link below:</p>
+        <div style="margin: 20px 0;">
+          <a href="${redirectUrl}" style="background-color: #28a745; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 6px;">Access Tree</a>
+        </div>
+        <p>Regards,</p>
+        <p><strong>The Ancestropedia Team</strong></p>
+        <hr style="margin-top: 30px;" />
+        <p style="font-size: 12px; color: #999; text-align: center;">
+          Need help? <a href="mailto:vermadheeraj945@gmail.com" style="color: #007BFF;">Contact us</a>
+        </p>
+      </div>
+    `,
+  };
+
   await transporter.sendMail(mailOptions);
 };
 
 export const sendTokenRejectionMail = async (user, redirectUrl) => {
-  const mailOptions = {};
+  const mailOptions = {
+    from: `"Ancestropedia Team" <${process.env.EMAIL}>`,
+    to: user.email,
+    subject: "Tree Access Request Rejected",
+    html: `
+      <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <img 
+            src="https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=294,fit=crop,q=95/mjE7lpywOyIq5zKx/ancestropedia-1-mePx4pQ230uGow26.png" 
+            alt="Ancestropedia Logo" 
+            style="width: 100px; height: 100px; object-fit: cover; border-radius: 50%;" 
+          />
+        </div>
+        <h2 style="text-align: center; color: #dc3545;">Access Request Rejected</h2>
+        <p>Hello ${user.firstName || "User"},</p>
+        <p>Unfortunately, your request to get the tokens has been rejected by the owner or admin.</p>
+        <p>You can reply to this email if you want to appeal or know more about the reason.</p>
+        <p>To view and check, please click the link below:</p>
+        <div style="margin: 20px 0;">
+          <a href="${redirectUrl}" style="background-color: #28a745; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 6px;">Access Tree</a>
+        </div>
+        <p>Regards,</p>
+        <p><strong>The Ancestropedia Team</strong></p>
+        <hr style="margin-top: 30px;" />
+        <p style="font-size: 12px; color: #999; text-align: center;">
+          Need help? <a href="mailto:vermadheeraj945@gmail.com" style="color: #007BFF;">Contact us</a>
+        </p>
+      </div>
+    `,
+  };
+
   await transporter.sendMail(mailOptions);
 };
 
@@ -227,7 +316,11 @@ export const getAllEvents = async (persons, marriages, treeId) => {
   persons.forEach((person) => {
     if (person.dob) {
       const dob = new Date(person.dob);
-      if (!isNaN(dob) && dob.getDate() === todayDate && dob.getMonth() === todayMonth) {
+      if (
+        !isNaN(dob) &&
+        dob.getDate() === todayDate &&
+        dob.getMonth() === todayMonth
+      ) {
         events.push({
           type: "birthday",
           date: dob.toISOString(),
@@ -241,7 +334,11 @@ export const getAllEvents = async (persons, marriages, treeId) => {
 
     if (person.dod) {
       const dod = new Date(person.dod);
-      if (!isNaN(dod) && dod.getDate() === todayDate && dod.getMonth() === todayMonth) {
+      if (
+        !isNaN(dod) &&
+        dod.getDate() === todayDate &&
+        dod.getMonth() === todayMonth
+      ) {
         events.push({
           type: "death anniversary",
           date: dod.toISOString(),
@@ -257,7 +354,11 @@ export const getAllEvents = async (persons, marriages, treeId) => {
   marriages.forEach((marriage) => {
     if (marriage.marriageDate) {
       const md = new Date(marriage.marriageDate);
-      if (!isNaN(md) && md.getDate() === todayDate && md.getMonth() === todayMonth) {
+      if (
+        !isNaN(md) &&
+        md.getDate() === todayDate &&
+        md.getMonth() === todayMonth
+      ) {
         events.push({
           type: "marriage anniversary",
           date: md.toISOString(),

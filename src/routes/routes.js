@@ -10,7 +10,8 @@ import notificationRoutes from "./notification.route.js";
 import supportRoutes from "./support.route.js";
 import adminRoutes from "./admin/index.js";
 import addressRoutes from "./adress.route.js";
-import eventRoutes from "./event.route.js"
+import eventRoutes from "./event.route.js";
+import tokenRoutes from "./token.request.route.js";
 
 export {
   reportRoutes,
@@ -24,6 +25,7 @@ export {
   treeRoutes,
   notificationRoutes,
   supportRoutes,
+  tokenRoutes,
   addressRoutes,
-  eventRoutes
+  eventRoutes,
 };

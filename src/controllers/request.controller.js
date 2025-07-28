@@ -22,10 +22,10 @@ export const sendRequest = async (req, res) => {
       });
     }
     const user = await User.findById(userId);
-    if(!user){
+    if (!user) {
       return res.status(404).json({
-        message:"User not found to send request"
-      })
+        message: "User not found to send request",
+      });
     }
 
     const exisitingRequest = await Request.findOne({
@@ -84,23 +84,35 @@ export const getRequests = async (req, res) => {
   }
 };
 
-//review request for the user and store the access in the database for 
-export const reviewRequest = async (req, res) => {
-  const { requestId } = req.params;
-  const { status } = req.body;
+//review request for the user and store the access in the database for
+//Remove it just for now, we will discuss it later on
+// export const reviewRequest = async (req, res) => {
+//   const { requestId } = req.params;
+//   const { status } = req.body;
 
-  try {
-    const request = await Request.findById(requestId);
-    if (!request) {
-      return res.status(404).json({
-        message: "Error,Invalid request id",
-      });
-    }
+//   try {
+//     const request = await Request.findById(requestId);
+//     if (!request) {
+//       return res.status(404).json({
+//         message: "Error,Invalid request id",
+//       });
+//     }
 
-    if (status !== "pending" && status !== "rejected") {
-      return res.status(400).json({
-        message: "invalid Status for request",
-      });
-    }
-  } catch (error) {}
-};
+//     if (status !== "accepted" && status !== "rejected") {
+//       return res.status(400).json({
+//         message: "invalid Status for request",
+//       });
+//     }
+//     request.status = status;
+//     await request.save();
+//     return res.status(200).json({
+//       message: `Request ${status} successfully`,
+//       data: request,
+//     });
+//   } catch (error) {
+//     logger.error("Error in reviewing the user request for profile data", error);
+//     return res.status(500).json({
+//       message: "Internal Server Error",
+//     });
+//   }
+// };

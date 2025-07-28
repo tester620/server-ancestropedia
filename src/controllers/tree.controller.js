@@ -5,6 +5,7 @@ import Tree from "../models/tree.model.js";
 import Relation from "../models/relations.model.js";
 import { imagekit } from "../config/imagekit.js";
 import { redis } from "../config/redis.js";
+import { createSpouseRelation } from "./relations.controler.js";
 
 export const createEmptyTree = async (req, res) => {
   const { name } = req.body;
@@ -47,6 +48,7 @@ export const createAndAddPerson = async (req, res) => {
     firstName,
     lastName,
     profession,
+    relationStartDate,
     dob,
     dod,
     gender,
@@ -75,6 +77,18 @@ export const createAndAddPerson = async (req, res) => {
   }
   if (!["father", "mother", "spouse"].includes(relatedType)) {
     return res.status(400).json({ message: "Invalid relation type" });
+  }
+  if (relatedType === "spouse" && !relationStartDate) {
+    return res.status(400).json({
+      message: "Relation date cannot be empty",
+    });
+  }
+  if (relatedType === "spouse") {
+    await createSpouseRelation({
+      husbandId: "",
+      wifeId: "",
+      date: relationStartDate,
+    });
   }
 
   if (!firstName || !lastName || !dob || living === undefined) {
@@ -147,6 +161,8 @@ export const createAndAddPerson = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+export const createTreeWithFamily = async (req, res) => {};
 
 export const removePerson = async (req, res) => {
   const { personId, treeId, force = false } = req.body;
@@ -397,35 +413,6 @@ export const getFullTree = async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching tree", error);
-    return res.status(500).json({ message: "Internal Server Error" });
-  }
-};
-
-export const getMyExistingTrees = async (req, res) => {
-  try {
-    const cacheKey = `userTrees:${req.user._id}`;
-    const cachedTrees = await redis.get(cacheKey);
-
-    if (cachedTrees) {
-      return res.status(200).json({
-        message: "Trees retrieved successfully (cached)",
-        data: JSON.parse(cachedTrees),
-      });
-    }
-
-    const trees = await Tree.find({ owner: req.user._id })
-      .select("id name createdAt")
-      .sort({ createdAt: -1 })
-      .lean();
-
-    await redis.set(cacheKey, JSON.stringify(trees), "EX", 1800);
-
-    return res.status(200).json({
-      message: "Trees retrieved successfully",
-      data: trees,
-    });
-  } catch (error) {
-    console.error("Error fetching trees", error);
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };

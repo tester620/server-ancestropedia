@@ -23,38 +23,9 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    marriedStatus: {
-      type: String,
-      enum: ["married", "single"],
-    },
-
     verificationToken: {
       type: String,
       default: null,
-    },
-    fatherName: {
-      type: String,
-    },
-    motherName: {
-      type: String,
-    },
-    grandFatherName: {
-      type: String,
-    },
-    grandMotherName: {
-      type: String,
-    },
-    mGrandFatherName: {
-      type: String,
-    },
-    mGrandMotherName: {
-      type: String,
-    },
-    siblings: {
-      type: [String],
-    },
-    childrenName: {
-      type: [String],
     },
     treeId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -87,15 +58,6 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-    },
-    dob: {
-      type: Date,
-    },
-    birthPlace: {
-      type: String,
-    },
-    alive: {
-      type: Boolean,
     },
   },
   {

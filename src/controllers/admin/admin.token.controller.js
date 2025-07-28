@@ -2,6 +2,13 @@ import mongoose from "mongoose";
 import logger from "../../config/logger.js";
 import TokenRequest from "../../models/token.model.js";
 import User from "../../models/user.model.js";
+import {
+  sendTokenAllotmentMail,
+  sendTokenRejectionMail,
+  sendTokenRemovalMail,
+} from "../../utils/helper.js";
+
+const redirectUrl = process.env.FRONTEND_URL;
 
 export const getPendingTokenRequests = async (req, res) => {
   try {
@@ -48,11 +55,25 @@ export const rejectTokenRequest = async (req, res) => {
         message: "Token request not found",
       });
     }
+    if (tokenRequest.status !== "pending") {
+      return res.status(400).json({
+        message: "Only pending requests can be rejected",
+      });
+    }
+    const user = await User.findById(tokenRequest.userId);
+    if (!user) {
+      return res.status(404).json({
+        message: "No user found with the token request",
+      });
+    }
     tokenRequest.status = "rejected";
     tokenRequest.comment = comment;
     await tokenRequest.save();
+    await sendTokenRejectionMail(user, redirectUrl);
+
     return res.status(200).json({
       message: "Token request rejected successfully",
+      data: tokenRequest,
     });
   } catch (error) {
     logger.error("Error in rejecting token request", error);
@@ -98,6 +119,7 @@ export const allotToken = async (req, res) => {
     user.tokens = tokenRequest.amount;
     await user.save();
     await tokenRequest.save();
+    await sendTokenAllotmentMail(user, redirectUrl);
     return res.status(200).json({
       message: "Token alotted successfully",
       data: tokenRequest,
@@ -149,6 +171,10 @@ export const removeToken = async (req, res) => {
     }
     user.tokens = amount;
     await user.save();
+    await sendTokenRemovalMail(user, redirectUrl);
+    return res.status(200).json({
+      message: "User token removed successfully",
+    });
   } catch (error) {
     logger.error("Error in removing the tokens", error);
     return res.status(500).json({
@@ -167,6 +193,7 @@ export const getAllTokenRequests = async (req, res) => {
     }
     return res.status(200).json({
       message: "All token requests fetched successfully",
+      data: tokens,
     });
   } catch (error) {
     logger.error("Error in getting all the token requests", error);
