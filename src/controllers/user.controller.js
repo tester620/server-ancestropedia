@@ -1,8 +1,9 @@
-import mongoose  from "mongoose";
+import mongoose from "mongoose";
 import { imagekit } from "../config/imagekit.js";
 import Post from "../models/post.model.js";
 import logger from "../config/logger.js";
 import Tree from "../models/tree.model.js";
+import Person from "../models/person.model.js";
 
 export const postStory = async (req, res) => {
   const { image, videoUrl, description } = req.body;
@@ -159,11 +160,49 @@ export const bulkDeletePost = async (req, res) => {
   }
 };
 
-export const searchTree = async(req,res)=>{
-  const {treeName} = req.body;
+export const searchTree = async (req, res) => {
+  const { treeName } = req.query;
   try {
-    const tree = await Tree.find({name:treeName})
+    const tree = await Tree.find({ name: { $regex: treeName, $options: "i" } });
+    if (!tree) {
+      return res.status(404).json({
+        message: "No tree found",
+      });
+    }
+    return res.status(200).json({
+      message: "TYree fetched succesfully",
+      data: tree,
+    });
   } catch (error) {
-    
+    logger.error("Error in searching the tree", error);
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
   }
-}
+};
+
+export const searchPerson = async (req, res) => {
+  const { personName } = req.query;
+  try {
+    const person = await Person.find({
+      $or: [
+        { firstName: { $regex: personName, $options: "i" } },
+        { lastName: { $regex: personName, $options: "i" } },
+      ],
+    });
+    if (!person || !person.length) {
+      return res.status(404).json({
+        message: "No person found",
+      });
+    }
+    return res.status(200).json({
+      message: "Person fetched succesfully",
+      data: person,
+    });
+  } catch (error) {
+    logger.error("Error in searching the person profile", error);
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};

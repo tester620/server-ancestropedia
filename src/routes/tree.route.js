@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  addMemberToExistingTree,
   createAndAddPerson,
   createEmptyTree,
   createTreeWithFamily,
@@ -22,5 +23,6 @@ router.get("/getFullTree", getFullTree);
 router.post("/createTreeWithFamily", createTreeWithFamily);
 router.get("/getFullTreeUser", getFullTreeUser);
 router.post("/recomended", getAllRecomendedTrees);
+router.post("/addMember", addMemberToExistingTree);
 
 export default router;

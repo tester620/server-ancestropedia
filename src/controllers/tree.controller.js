@@ -6,6 +6,7 @@ import Relation from "../models/relations.model.js";
 import { imagekit } from "../config/imagekit.js";
 import { redis } from "../config/redis.js";
 import { createSpouseRelation } from "./relations.controler.js";
+import User from "../models/user.model.js";
 
 export const createEmptyTree = async (req, res) => {
   const { name } = req.body;
@@ -723,6 +724,64 @@ export const getPersonDetails = async (req, res) => {
     });
   } catch (error) {
     logger.error("Error in fetching person details", error);
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
+export const addMemberToExistingTree = async (req, res) => {
+  const { userId, treeId, relatedFrom, type } = req.body;
+  if (!userId || !mongoose.isValidObjectId(userId)) {
+    return res.status(400).json({
+      message: "Valid User Id is required",
+    });
+  }
+  const user = await User.findById(userId);
+  if (!user) {
+    return res.status(404).json({
+      message: "USer not found",
+    });
+  }
+  if (user.treeId !== null) {
+    return res.status(400).json({
+      message: "User already in a family group",
+    });
+  }
+
+  try {
+    const tree = await Tree.findById(treeId);
+    if (!tree) {
+      return res.status(400).json({
+        message: "Tree not found",
+      });
+    }
+    if (tree.members.includes(user._id)) {
+      return res.status(400).json({
+        message: "User already added in tree",
+      });
+    }
+    user.treeId = treeId;
+    tree.members.push(user._id);
+    const newRelation = new Relation({
+      treeId,
+      from: relatedFrom,
+      to: user._id,
+      type,
+    });
+    await newRelation.save();
+    await user.save();
+    await Tree.save();
+
+    return res.status(200).json({
+      message: "User added to tree succesfully",
+      data: {
+        tree,
+        newRelation,
+      },
+    });
+  } catch (error) {
+    logger.error("Error in adding userr to the existing tree", error);
     return res.status(500).json({
       message: "Internal Server Error",
     });
