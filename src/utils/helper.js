@@ -272,115 +272,44 @@ export const sendTokenRejectionMail = async (user, redirectUrl) => {
   await transporter.sendMail(mailOptions);
 };
 
-export const getAllEvents = async (persons, marriages, treeId) => {
+export const getAllEvents = (persons) => {
   const today = new Date();
-  const todayMonth = today.getMonth();
-  const todayDate = today.getDate();
+  const day = today.getUTCDate();
+  const month = today.getUTCMonth() + 1;
 
-  const events = [];
-  const personMap = {};
-  persons.forEach((p) => {
-    personMap[p._id.toString()] = p;
-  });
-
-  const relations = await Relation.find({ treeId });
-
-  const addRelationInfo = (personId) => {
-    const related = [];
-    relations.forEach((rel) => {
-      if (rel.from.toString() === personId.toString()) {
-        const toPerson = personMap[rel.to.toString()];
-        if (toPerson) {
-          related.push({
-            type: rel.relationType,
-            name: toPerson.name,
-            gender: toPerson.gender,
-            personId: toPerson._id,
-          });
-        }
-      } else if (rel.to.toString() === personId.toString()) {
-        const fromPerson = personMap[rel.from.toString()];
-        if (fromPerson) {
-          related.push({
-            type: rel.relationType,
-            name: fromPerson.name,
-            gender: fromPerson.gender,
-            personId: fromPerson._id,
-          });
-        }
-      }
-    });
-    return related;
-  };
-
-  persons.forEach((person) => {
+  return persons.reduce((events, person) => {
+    // Check birthdays
     if (person.dob) {
       const dob = new Date(person.dob);
-      if (
-        !isNaN(dob) &&
-        dob.getDate() === todayDate &&
-        dob.getMonth() === todayMonth
-      ) {
+      if (dob.getUTCDate() === day && dob.getUTCMonth() + 1 === month) {
         events.push({
           type: "birthday",
-          date: dob.toISOString(),
-          personId: person._id,
-          name: person.name,
-          gender: person.gender,
-          relations: addRelationInfo(person._id),
+          person: {
+            _id: person._id,
+            firstName: person.firstName,
+            lastName: person.lastName,
+            profileImage: person.profileImage,
+          },
         });
       }
     }
 
-    if (person.dod) {
+    // Check death anniversaries
+    if (!person.living && person.dod) {
       const dod = new Date(person.dod);
-      if (
-        !isNaN(dod) &&
-        dod.getDate() === todayDate &&
-        dod.getMonth() === todayMonth
-      ) {
+      if (dod.getUTCDate() === day && dod.getUTCMonth() + 1 === month) {
         events.push({
-          type: "death anniversary",
-          date: dod.toISOString(),
-          personId: person._id,
-          name: person.name,
-          gender: person.gender,
-          relations: addRelationInfo(person._id),
+          type: "death",
+          person: {
+            _id: person._id,
+            firstName: person.firstName,
+            lastName: person.lastName,
+            profileImage: person.profileImage,
+          },
         });
       }
     }
-  });
 
-  marriages.forEach((marriage) => {
-    if (marriage.marriageDate) {
-      const md = new Date(marriage.marriageDate);
-      if (
-        !isNaN(md) &&
-        md.getDate() === todayDate &&
-        md.getMonth() === todayMonth
-      ) {
-        events.push({
-          type: "marriage anniversary",
-          date: md.toISOString(),
-          marriageId: marriage._id,
-          spouseA: {
-            id: marriage.spouseA,
-            name: personMap[marriage.spouseA.toString()]?.name,
-            gender: personMap[marriage.spouseA.toString()]?.gender,
-          },
-          spouseB: {
-            id: marriage.spouseB,
-            name: personMap[marriage.spouseB.toString()]?.name,
-            gender: personMap[marriage.spouseB.toString()]?.gender,
-          },
-          relations: [
-            ...addRelationInfo(marriage.spouseA),
-            ...addRelationInfo(marriage.spouseB),
-          ],
-        });
-      }
-    }
-  });
-
-  return events;
+    return events;
+  }, []);
 };

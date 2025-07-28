@@ -2,6 +2,7 @@ import mongoose  from "mongoose";
 import { imagekit } from "../config/imagekit.js";
 import Post from "../models/post.model.js";
 import logger from "../config/logger.js";
+import Tree from "../models/tree.model.js";
 
 export const postStory = async (req, res) => {
   const { image, videoUrl, description } = req.body;
@@ -157,3 +158,12 @@ export const bulkDeletePost = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+export const searchTree = async(req,res)=>{
+  const {treeName} = req.body;
+  try {
+    const tree = await Tree.find({name:treeName})
+  } catch (error) {
+    
+  }
+}
