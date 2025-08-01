@@ -3,11 +3,21 @@ import logger from "../config/logger.js";
 import validator from "validator";
 
 export const submitMessage = async (req, res) => {
-  const { email, name, message } = req.body;
+  const { email, name, message, phone } = req.body;
   try {
     if (!email || !name || !message) {
       return res.status(400).json({
         message: "PLease fill all the required feilds",
+      });
+    }
+    if (!phone) {
+      return res.status(400).json({
+        message: "Phone info is required",
+      });
+    }
+    if (!validator.isMobilePhone(phone)) {
+      return res.status(400).json({
+        message: "Please enter a valid phone number",
       });
     }
     if (!validator.isEmail(email)) {
@@ -29,6 +39,7 @@ export const submitMessage = async (req, res) => {
       message,
       email,
       name,
+      phone,
     });
 
     await newMessage.save();

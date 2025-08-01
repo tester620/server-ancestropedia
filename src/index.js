@@ -24,6 +24,7 @@ import {
   tokenRoutes,
 } from "./routes/routes.js";
 import logger from "./config/logger.js";
+import { limiter } from "./utils/limiting.js";
 
 dotenv.config();
 const app = express();
@@ -37,7 +38,7 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
 
-app.use("/api/ping", (_, res) => {
+app.use("/api/ping", limiter, (_, res) => {
   return res.send("Pong");
 });
 
@@ -45,7 +46,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api", adminRoutes);
 app.use("/api/support", supportRoutes);
 app.use("/api/report", protectRoute, reportRoutes);
-app.use("/api/profile", protectRoute, profileRoutes);
+app.use("/api/profile",limiter, protectRoute, profileRoutes);
 app.use("/api/user", protectRoute, userRoutes);
 app.use("/api/user/address", protectRoute, addressRoutes);
 app.use("/api/user/tree", protectRoute, treeRoutes);
