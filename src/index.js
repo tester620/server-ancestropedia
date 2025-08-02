@@ -46,7 +46,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api", adminRoutes);
 app.use("/api/support", supportRoutes);
 app.use("/api/report", protectRoute, reportRoutes);
-app.use("/api/profile",limiter, protectRoute, profileRoutes);
+app.use("/api/profile", protectRoute, profileRoutes);
 app.use("/api/user", protectRoute, userRoutes);
 app.use("/api/user/address", protectRoute, addressRoutes);
 app.use("/api/user/tree", protectRoute, treeRoutes);
