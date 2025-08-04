@@ -22,6 +22,7 @@ import {
   addressRoutes,
   eventRoutes,
   tokenRoutes,
+  newsLetterRoute,
 } from "./routes/routes.js";
 import logger from "./config/logger.js";
 import { limiter } from "./utils/limiting.js";
@@ -42,6 +43,7 @@ app.use("/api/ping", limiter, (_, res) => {
   return res.send("Pong");
 });
 
+app.use("/api/newsletter", newsLetterRoute);
 app.use("/api/auth", authRoutes);
 app.use("/api", adminRoutes);
 app.use("/api/support", supportRoutes);

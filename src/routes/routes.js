@@ -12,9 +12,11 @@ import adminRoutes from "./admin/index.js";
 import addressRoutes from "./adress.route.js";
 import eventRoutes from "./event.route.js";
 import tokenRoutes from "./token.request.route.js";
+import newsLetterRoute from "./newsletter.route.js";
 
 export {
   reportRoutes,
+  newsLetterRoute,
   adminRoutes,
   profileRoutes,
   authRoutes,
