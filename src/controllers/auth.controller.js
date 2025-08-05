@@ -190,13 +190,14 @@ export const verifyPassToken = async (req, res) => {
   const { otp } = req.body;
 
   try {
+    console.log(email,otp)
     if (!email || !otp) {
       return res
         .status(400)
         .json({ message: "Please provide the Email and OTP both" });
     }
 
-    if (otp.length !== 6) {
+    if (otp.toString().length !== 6) {
       return res.status(400).json({ message: "OTP must be of 6 digits only" });
     }
 
@@ -289,7 +290,7 @@ export const verifyMailToken = async (req, res) => {
         message: "Both Email and OTP are required",
       });
     }
-    if (otp.length !== 6) {
+    if (otp.toString().length !== 6) {
       return res.status(400).json({
         message: "OTP must be of length 6 characters",
       });
