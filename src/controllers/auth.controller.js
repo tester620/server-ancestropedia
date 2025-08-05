@@ -96,7 +96,7 @@ export const logout = (_, res) => {
 export const googleCallback = async (req, res) => {
   try {
     generateToken(req.user._id, res);
-    return res.redirect(`${process.env.FRONTEND_URL}/mydata`);
+    return res.redirect(`${process.env.FRONTEND_URL}/login`);
   } catch (err) {
     console.error("OAuth callback error:", err);
     res.status(500).json({ message: "Login failed" });
@@ -175,7 +175,7 @@ export const resetPassToken = async (req, res) => {
 
     await sendPassMail(otp, user);
     return res.status(200).json({
-      message: "Mail sent successfully",
+      message: "OTP has been sent to the mail",
     });
   } catch (error) {
     logger.error("Error in sending OTp for pass reset", error);
@@ -212,7 +212,7 @@ export const verifyPassToken = async (req, res) => {
 
     if (!user.passToken || user.passTokenExpires < Date.now()) {
       return res.status(401).json({
-        message: "OTP expired or not requested. Please request a new one.",
+        message: "OTP expired or not requested.",
       });
     }
 
