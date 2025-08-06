@@ -63,7 +63,7 @@ export const signup = async (req, res) => {
     user.verificationToken = otp;
     await user.save();
     return res.status(201).json({
-      message: "User created successfully",
+      message: "Account Created!",
       data: user,
     });
   } catch (error) {
@@ -96,7 +96,7 @@ export const logout = (_, res) => {
 export const googleCallback = async (req, res) => {
   try {
     generateToken(req.user._id, res);
-    return res.redirect(`${process.env.FRONTEND_URL}/login`);
+    return res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
   } catch (err) {
     console.error("OAuth callback error:", err);
     res.status(500).json({ message: "Login failed" });
@@ -113,7 +113,7 @@ export const login = async (req, res) => {
         message: "Invalid Credentials",
       });
     }
-    if (user.googleAuth) {
+    if (user.googleAuth && !user.password) {
       return res.status(400).json({
         message: "Please login using google",
       });
@@ -123,9 +123,10 @@ export const login = async (req, res) => {
       user.verificationToken = otp;
       await user.save();
       return res.status(401).json({
+        code: "ACCOUNT_NOT_VERIFIED",
         message:
-          "Kinldy verify your account before logging in. Verification mail has been sent",
-      });
+          "Kindly verify your account before logging in. Verification mail has been sent.",
+      }); 
     }
     const isValid = await bcrypt.compare(password, user?.password);
 
@@ -151,6 +152,11 @@ export const login = async (req, res) => {
 export const resetPassToken = async (req, res) => {
   const { email } = req.body;
   try {
+    if (!email) {
+      return res.status(400).json({
+        message: "Please enter Email",
+      });
+    }
     if (!validator.isEmail(email)) {
       return res.status(400).json({
         message: "Invalid Email format",
@@ -160,11 +166,6 @@ export const resetPassToken = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         message: "User not found",
-      });
-    }
-    if (user.googleAuth) {
-      return res.status(400).json({
-        message: "Please login using google",
       });
     }
     const expiresIn = 5 * 60 * 1000;
@@ -190,7 +191,7 @@ export const verifyPassToken = async (req, res) => {
   const { otp } = req.body;
 
   try {
-    console.log(email,otp)
+    console.log(email, otp);
     if (!email || !otp) {
       return res
         .status(400)
@@ -325,6 +326,7 @@ export const verifyMailToken = async (req, res) => {
     generateToken(user._id, res);
     return res.status(200).json({
       message: "Account verified successfully",
+      data: user,
     });
   } catch (error) {
     logger.error("Error in verification of user mail", error);
@@ -334,3 +336,44 @@ export const verifyMailToken = async (req, res) => {
   }
 };
 
+export const checkAuth = async (req, res) => {
+  if (req.user) {
+    return res.status(200).json({
+      message: "Auth check successfull",
+      data: req.user,
+    });
+  } else {
+    return res.status(401).json({
+      message: "Unauthorised- Not Logged in",
+    });
+  }
+};
+
+export const mailVerify = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({
+        message: "User not found",
+      });
+    }
+
+    if (user.verified) {
+      return res.status(401).json({
+        message: "Acoount already verified",
+      });
+    }
+    const otp = await sendVerificationMail(user);
+    user.verificationToken = otp;
+    await user.save();
+    return res.status(200).json({
+      message: "OTP has been sent to the mail",
+    });
+  } catch (error) {
+    logger.error("Error in resending the verification mail to the user", error);
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
