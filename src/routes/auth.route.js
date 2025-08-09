@@ -12,7 +12,6 @@ import {
   verifyPassToken,
 } from "../controllers/auth.controller.js";
 import passport from "passport";
-import { limiter } from "../utils/limiting.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
@@ -20,7 +19,7 @@ const router = express.Router();
 router.post("/signup", signup);
 router.get("/checkAuth", protectRoute, checkAuth);
 
-router.post("/login", limiter, login);
+router.post("/login", login);
 
 router.post("/logout", logout);
 
