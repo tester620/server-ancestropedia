@@ -1,4 +1,5 @@
 import jwt  from "jsonwebtoken";
+const isProd = process.env.NODE_ENV === "production";
 
 export const generateToken = (userId, res) => {
   const token = jwt.sign({ userId }, process.env.JWT_KEY, {
