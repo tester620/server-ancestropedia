@@ -5,10 +5,12 @@ export const generateToken = (userId, res) => {
     expiresIn: "7d",
   });
 
-  res.cookie("jwt", token, {
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-    sameSite: "None",
-    secure: true,
-  });
+    res.cookie("jwt", token, {
+  httpOnly: true,
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+  secure: isProd,
+  sameSite: isProd ? "none" : "lax",
+  domain: isProd ? "ancestropedia.vercel.app" : "localhost",
+});
   return token;
 };
